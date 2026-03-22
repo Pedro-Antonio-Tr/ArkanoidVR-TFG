@@ -3,12 +3,14 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 3
-  tags: []
+  tags:
+  - Pelota
+  - Bloque
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Overlay UI
   - Water
   - UI
   - Arkanoid

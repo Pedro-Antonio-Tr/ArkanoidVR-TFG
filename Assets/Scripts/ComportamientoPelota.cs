@@ -30,6 +30,18 @@ public class ComportamientoPelota : MonoBehaviour
         // Forzamos la velocidad constante en cada frame para evitar que se ralentice o acelere demasiado por bugs.
         rb.linearVelocity = rb.linearVelocity.normalized * velocidad;
 
+        // SISTEMA ANTI-SOFTLOCK
+        UnityEngine.Vector3 velActual = rb.linearVelocity;
+
+        // Comprobamos si la velocidad vertical (Y) es peligrosamente baja (ej. menor a 2)
+        if (Mathf.Abs(velActual.y) < 2f)
+        {
+            // Le damos un "empujoncito" artificial de 2 unidades en la dirección que ya llevaba
+            // (Si iba un poco hacia arriba, la subimos más; si iba hacia abajo, la bajamos más)
+            velActual.y = (velActual.y >= 0) ? 2f : -2f;
+            rb.linearVelocity = velActual;
+        }
+
         // Comprobar si ha caído por debajo de la pala
         if (transform.localPosition.y < limiteInferiorY)
         {

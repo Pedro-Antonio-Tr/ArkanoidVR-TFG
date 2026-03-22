@@ -7859,7 +7859,7 @@ MonoBehaviour:
   panelMenu: {fileID: 2081011806}
   headAnchor: {fileID: 507113514}
   distanciaDeLaCara: 1.8
-  scriptLaser: {fileID: 1257666077}
+  scriptLaser: {fileID: 0}
 --- !u!65 &1157330734
 BoxCollider:
   m_ObjectHideFlags: 0
