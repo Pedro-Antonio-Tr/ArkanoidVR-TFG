@@ -1,2 +1,16 @@
 fileFormatVersion: 2
 guid: 5f5c992e72e29da4991330fe4820e771
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - textoMensajes: {instanceID: 0}
+  - textoEstadisticas: {instanceID: 0}
+  - controladorPala: {instanceID: 0}
+  - prefabPelota: {fileID: 6306325649414794681, guid: b8ae3bcaf8029a34083087f6d6703705, type: 3}
+  - puntoAparicion: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
