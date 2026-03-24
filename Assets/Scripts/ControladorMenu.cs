@@ -3,91 +3,134 @@ using TMPro;
 
 public class ControladorMenuVR : MonoBehaviour
 {
-    [Header("Configuración del Menú")]
-    public GameObject panelMenu;
+    [Header("Configuración Base")]
+    public GameObject panelMenu; // El Fondo_Menu
     public Transform headAnchor;
     public PunteroLaserVR scriptLaser;
 
-    [Header("Referencias UI")]
+    [Header("Máquina de Estados (Paneles)")]
+    public GameObject panelBienvenida;
+    public GameObject panelNiveles;
+    public GameObject panelPausa;
+    public GameObject panelAjustes;
+
+    [Header("Centrado de Vista Clínico")]
+    public Transform pantallaArkanoid;
+    public float distanciaPantallaArkanoid = 12f; // A cuántos metros se coloca la pantalla grande
+    public float distanciaMenu = 1.8f; // A cuántos metros sale el menú emergente
+
+    [Header("Referencias UI Antiguas (Niveles)")]
     public TextMeshProUGUI textoNumNivel;
     public TextMeshProUGUI textoStatsClinicas;
-
-    public GameObject botonIzq, botonDer, botonJugar, botonReiniciar, botonVolverMenu;
-
-    [Header("Ajustes Clínicos")]
-    public float distanciaDeLaCara = 1.8f;
-
     private int nivelSeleccionado = 0;
+
+    private bool primeraVezAbierto = true;
 
     void Start()
     {
-        // Al empezar, mostramos el menú principal
+        // Al arrancar, mostramos el menú de bienvenida
         panelMenu.SetActive(true);
-        ActualizarVistaMenu();
+        AbrirPanel(panelBienvenida);
         ColocarMenuDelanteDeLaMirada();
     }
 
     void Update()
     {
+        // Botones de las gafas (A, X, o Menú)
         if (OVRInput.GetDown(OVRInput.Button.One) ||
             OVRInput.GetDown(OVRInput.Button.Three) ||
             OVRInput.GetDown(OVRInput.Button.Start))
         {
-            if (panelMenu == null || headAnchor == null) return;
-
-            bool estaActivado = !panelMenu.activeSelf;
-            panelMenu.SetActive(estaActivado);
-
-            if (scriptLaser != null) scriptLaser.enabled = estaActivado;
-
-            if (GestorArkanoid.Instancia != null)
-            {
-                GestorArkanoid.Instancia.AlternarPausa(estaActivado);
-            }
-
-            if (estaActivado)
-            {
-                ActualizarVistaMenu();
-                ColocarMenuDelanteDeLaMirada();
-            }
+            AlternarMenuGeneral();
         }
     }
 
-    void ActualizarVistaMenu()
+    public void AlternarMenuGeneral()
     {
-        // Leemos el alcance máximo de la pala y lo mostramos siempre en el menú
-        if (GestorArkanoid.Instancia != null && GestorArkanoid.Instancia.controladorPala != null)
+        if (panelMenu == null || headAnchor == null) return;
+
+        bool estaActivado = !panelMenu.activeSelf;
+        panelMenu.SetActive(estaActivado);
+
+        if (scriptLaser != null) scriptLaser.enabled = estaActivado;
+
+        // Pausamos o reanudamos el juego
+        if (GestorArkanoid.Instancia != null)
         {
-            string romIzq = Mathf.Abs(GestorArkanoid.Instancia.controladorPala.maxEstiramientoIzquierda).ToString("F2");
-            string romDer = Mathf.Abs(GestorArkanoid.Instancia.controladorPala.maxEstiramientoDerecha).ToString("F2");
-            textoStatsClinicas.text = $"RANGO DE MOVIMIENTO ACTIVO\nIzquierda: {romIzq} | Derecha: {romDer}";
+            GestorArkanoid.Instancia.AlternarPausa(estaActivado);
         }
 
-        // Si el juego NO ha empezado, estamos en el Selector de Niveles
-        if (GestorArkanoid.Instancia != null && !GestorArkanoid.Instancia.juegoEmpezado)
+        if (estaActivado)
         {
-            botonIzq.SetActive(true);
-            botonDer.SetActive(true);
-            botonJugar.SetActive(true);
-            textoNumNivel.gameObject.SetActive(true);
+            ColocarMenuDelanteDeLaMirada();
 
-            botonReiniciar.SetActive(false);
-            botonVolverMenu.SetActive(false);
-
-            textoNumNivel.text = "NIVEL " + (nivelSeleccionado + 1);
-        }
-        else // Si el juego HA empezado, estamos en la Pantalla de Pausa
-        {
-            botonIzq.SetActive(false);
-            botonDer.SetActive(false);
-            botonJugar.SetActive(false);
-            textoNumNivel.gameObject.SetActive(false);
-
-            botonReiniciar.SetActive(true);
-            botonVolverMenu.SetActive(true);
+            // Decidimos qué panel mostrar al abrir el menú
+            if (primeraVezAbierto)
+            {
+                AbrirPanel(panelBienvenida);
+            }
+            else if (GestorArkanoid.Instancia != null && !GestorArkanoid.Instancia.juegoEmpezado)
+            {
+                AbrirPanel(panelNiveles);
+            }
+            else
+            {
+                ActualizarStatsPausa();
+                AbrirPanel(panelPausa);
+            }
         }
     }
 
+    // Apaga todos los paneles y enciende solo el que le pasemos
+    public void AbrirPanel(GameObject panelDestino)
+    {
+        panelBienvenida.SetActive(false);
+        panelNiveles.SetActive(false);
+        panelPausa.SetActive(false);
+        panelAjustes.SetActive(false);
+
+        panelDestino.SetActive(true);
+    }
+
+    public void CentrarVistaUsuario()
+    {
+        if (headAnchor == null || pantallaArkanoid == null) return;
+
+        Vector3 headPos = headAnchor.position;
+        Vector3 lookDirection = headAnchor.forward; // El vector natural de la mirada (incluso tumbado)
+
+        Vector3 posPantalla = headPos + (lookDirection.normalized * distanciaPantallaArkanoid);
+        pantallaArkanoid.position = posPantalla;
+
+        // Hacemos que la pantalla nos mire, y le damos la vuelta para que el Quad no se vea invertido
+        pantallaArkanoid.LookAt(headPos);
+        pantallaArkanoid.Rotate(0, 180, 0);
+
+        ColocarMenuDelanteDeLaMirada();
+    }
+
+    void ColocarMenuDelanteDeLaMirada()
+    {
+        Vector3 headPos = headAnchor.position;
+        Vector3 lookDirection = headAnchor.forward;
+
+        Vector3 targetPos = headPos + (lookDirection.normalized * distanciaMenu);
+        targetPos.y = Mathf.Max(targetPos.y, headPos.y - 0.2f);
+
+        transform.position = targetPos;
+        transform.LookAt(headPos);
+        transform.Rotate(0, 180, 0);
+    }
+
+    // Botón "Empezar" del panel de Bienvenida
+    public void BotonUI_AvanzarDesdeBienvenida()
+    {
+        primeraVezAbierto = false;
+        AbrirPanel(panelNiveles);
+        CambiarNivel(0);
+    }
+
+    // Botones del panel de Niveles
     public void CambiarNivel(int direccion)
     {
         if (GestorArkanoid.Instancia == null) return;
@@ -95,7 +138,6 @@ public class ControladorMenuVR : MonoBehaviour
         int totalNiveles = GestorArkanoid.Instancia.listaDeNiveles.Length;
         nivelSeleccionado += direccion;
 
-        // Efecto carrusel (si pasas del último, vuelve al primero)
         if (nivelSeleccionado < 0) nivelSeleccionado = totalNiveles - 1;
         if (nivelSeleccionado >= totalNiveles) nivelSeleccionado = 0;
 
@@ -106,37 +148,39 @@ public class ControladorMenuVR : MonoBehaviour
     public void BotonUI_Jugar()
     {
         GestorArkanoid.Instancia.EmpezarPartidaDesdeMenu();
-        CerrarMenu();
+        AlternarMenuGeneral(); // Cierra el menú
     }
 
+    // Botones del panel de Pausa
     public void BotonUI_Reiniciar()
     {
         GestorArkanoid.Instancia.ReiniciarNivelActual();
-        CerrarMenu();
+        AlternarMenuGeneral();
     }
 
     public void BotonUI_VolverAlMenu()
     {
         GestorArkanoid.Instancia.VolverAlMenuPrincipal();
-        ActualizarVistaMenu(); // Refresca los botones para mostrar el selector
+        AbrirPanel(panelNiveles);
     }
 
-    private void CerrarMenu()
+    // Botones de navegación hacia Ajustes
+    public void BotonUI_IrAAjustes() { 
+        AbrirPanel(panelAjustes); 
+    }
+    public void BotonUI_VolverAAjustesAnterior()
     {
-        panelMenu.SetActive(false);
-        if (scriptLaser != null) scriptLaser.enabled = false;
+        if (!GestorArkanoid.Instancia.juegoEmpezado) AbrirPanel(panelNiveles);
+        else AbrirPanel(panelPausa);
     }
 
-    void ColocarMenuDelanteDeLaMirada()
+    void ActualizarStatsPausa()
     {
-        UnityEngine.Vector3 headPos = headAnchor.position;
-        UnityEngine.Vector3 lookDirection = headAnchor.forward;
-
-        UnityEngine.Vector3 targetPos = headPos + (lookDirection.normalized * distanciaDeLaCara);
-        targetPos.y = Mathf.Max(targetPos.y, headPos.y - 0.2f);
-
-        transform.position = targetPos;
-        transform.LookAt(headPos);
-        transform.Rotate(0, 180, 0);
+        if (GestorArkanoid.Instancia != null && GestorArkanoid.Instancia.controladorPala != null)
+        {
+            string romIzq = Mathf.Abs(GestorArkanoid.Instancia.controladorPala.maxEstiramientoIzquierda).ToString("F2");
+            string romDer = Mathf.Abs(GestorArkanoid.Instancia.controladorPala.maxEstiramientoDerecha).ToString("F2");
+            textoStatsClinicas.text = $"ROM ACTIVO\nIzq: {romIzq} | Der: {romDer}";
+        }
     }
 }
