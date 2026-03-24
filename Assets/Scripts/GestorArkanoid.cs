@@ -136,6 +136,10 @@ public class GestorArkanoid : MonoBehaviour
         int minutos = Mathf.FloorToInt(tiempoPartida / 60F);
         int segundos = Mathf.FloorToInt(tiempoPartida - minutos * 60);
         textoEstadisticas.text = $"TIEMPO: {string.Format("{0:00}:{1:00}", minutos, segundos)}";
+        if (MonitorClinico.Instancia != null)
+        {
+            MonitorClinico.Instancia.GuardarDatosCSV();
+        }
     }
 
     void LimpiarPelotas()

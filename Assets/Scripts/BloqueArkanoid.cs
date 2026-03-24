@@ -20,6 +20,10 @@ public class BloqueArkanoid : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Pelota"))
         {
+            if (MonitorClinico.Instancia != null)
+            {
+                MonitorClinico.Instancia.IniciarMedicionReaccion();
+            }
             puntosDeVida--;
 
             if (puntosDeVida <= 0)
