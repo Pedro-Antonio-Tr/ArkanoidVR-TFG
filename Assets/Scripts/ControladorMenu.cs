@@ -1,12 +1,17 @@
 using UnityEngine;
 using TMPro;
+using UnityEngine.UI;
 
 public class ControladorMenuVR : MonoBehaviour
 {
     [Header("Configuración Base")]
-    public GameObject panelMenu; // El Fondo_Menu
+    public GameObject panelMenu;
     public Transform headAnchor;
-    public PunteroLaserVR scriptLaser;
+
+    [Header("Punteros Láser")]
+    public PunteroLaserVR laserIzquierdo;
+    public PunteroLaserVR laserDerecho;
+    public UnityEngine.EventSystems.OVRInputModule inputModule;
 
     [Header("Máquina de Estados (Paneles)")]
     public GameObject panelBienvenida;
@@ -14,10 +19,15 @@ public class ControladorMenuVR : MonoBehaviour
     public GameObject panelPausa;
     public GameObject panelAjustes;
 
-    [Header("Centrado de Vista Clínico")]
+    [Header("Botones de Modo (Para oscurecer en todos los menús)")]
+    public Button[] botonesMandoIzq;
+    public Button[] botonesMandoDer;
+    public Button[] botonesMandoAmbos;
+
+    [Header("Centrado de Vista")]
     public Transform pantallaArkanoid;
-    public float distanciaPantallaArkanoid = 12f; // A cuántos metros se coloca la pantalla grande
-    public float distanciaMenu = 1.8f; // A cuántos metros sale el menú emergente
+    public float distanciaPantallaArkanoid = 4f;
+    public float distanciaMenu = 1.8f;
 
     [Header("Referencias UI Antiguas (Niveles)")]
     public TextMeshProUGUI textoNumNivel;
@@ -28,15 +38,16 @@ public class ControladorMenuVR : MonoBehaviour
 
     void Start()
     {
-        // Al arrancar, mostramos el menú de bienvenida
         panelMenu.SetActive(true);
         AbrirPanel(panelBienvenida);
         ColocarMenuDelanteDeLaMirada();
+
+        ActualizarLaseres(true);
+        ActualizarBotonesModo();
     }
 
     void Update()
     {
-        // Botones de las gafas (A, X, o Menú)
         if (OVRInput.GetDown(OVRInput.Button.One) ||
             OVRInput.GetDown(OVRInput.Button.Three) ||
             OVRInput.GetDown(OVRInput.Button.Start))
@@ -52,9 +63,8 @@ public class ControladorMenuVR : MonoBehaviour
         bool estaActivado = !panelMenu.activeSelf;
         panelMenu.SetActive(estaActivado);
 
-        if (scriptLaser != null) scriptLaser.enabled = estaActivado;
+        ActualizarLaseres(estaActivado);
 
-        // Pausamos o reanudamos el juego
         if (GestorArkanoid.Instancia != null)
         {
             GestorArkanoid.Instancia.AlternarPausa(estaActivado);
@@ -64,7 +74,6 @@ public class ControladorMenuVR : MonoBehaviour
         {
             ColocarMenuDelanteDeLaMirada();
 
-            // Decidimos qué panel mostrar al abrir el menú
             if (primeraVezAbierto)
             {
                 AbrirPanel(panelBienvenida);
@@ -81,7 +90,6 @@ public class ControladorMenuVR : MonoBehaviour
         }
     }
 
-    // Apaga todos los paneles y enciende solo el que le pasemos
     public void AbrirPanel(GameObject panelDestino)
     {
         panelBienvenida.SetActive(false);
@@ -97,12 +105,11 @@ public class ControladorMenuVR : MonoBehaviour
         if (headAnchor == null || pantallaArkanoid == null) return;
 
         Vector3 headPos = headAnchor.position;
-        Vector3 lookDirection = headAnchor.forward; // El vector natural de la mirada (incluso tumbado)
+        Vector3 lookDirection = headAnchor.forward;
 
         Vector3 posPantalla = headPos + (lookDirection.normalized * distanciaPantallaArkanoid);
         pantallaArkanoid.position = posPantalla;
 
-        // Hacemos que la pantalla nos mire, y le damos la vuelta para que el Quad no se vea invertido
         pantallaArkanoid.LookAt(headPos);
         pantallaArkanoid.Rotate(0, 180, 0);
 
@@ -111,8 +118,16 @@ public class ControladorMenuVR : MonoBehaviour
 
     void ColocarMenuDelanteDeLaMirada()
     {
+        if (headAnchor == null) return;
+
         Vector3 headPos = headAnchor.position;
         Vector3 lookDirection = headAnchor.forward;
+
+        if (headPos.y < 0.5f)
+        {
+            headPos.y = 1.5f;
+            if (lookDirection == Vector3.zero) lookDirection = Vector3.forward;
+        }
 
         Vector3 targetPos = headPos + (lookDirection.normalized * distanciaMenu);
         targetPos.y = Mathf.Max(targetPos.y, headPos.y - 0.2f);
@@ -122,7 +137,122 @@ public class ControladorMenuVR : MonoBehaviour
         transform.Rotate(0, 180, 0);
     }
 
-    // Botón "Empezar" del panel de Bienvenida
+    public void BotonUI_CambiarMandoActivo(int modoElegido)
+    {
+        if (MonitorClinico.Instancia != null)
+        {
+            MonitorClinico.Instancia.modoActual = (MonitorClinico.ModoControl)modoElegido;
+        }
+        ActualizarLaseres(true);
+        ActualizarBotonesModo();
+    }
+
+    private void ActualizarBotonesModo()
+    {
+        MonitorClinico.ModoControl modo = MonitorClinico.ModoControl.Derecho;
+        if (MonitorClinico.Instancia != null)
+        {
+            modo = MonitorClinico.Instancia.modoActual;
+        }
+
+        foreach (Button btn in botonesMandoIzq)
+        {
+            if (btn != null)
+            {
+                btn.interactable = (modo != MonitorClinico.ModoControl.Izquierdo);
+            }
+        }
+
+        foreach (Button btn in botonesMandoDer)
+        {
+            if (btn != null)
+            {
+                btn.interactable = (modo != MonitorClinico.ModoControl.Derecho);
+            }
+        }
+
+        foreach (Button btn in botonesMandoAmbos)
+        {
+            if (btn != null)
+            {
+                btn.interactable = (modo != MonitorClinico.ModoControl.Ambos);
+            }
+        }
+    }
+
+    private void ActualizarLaseres(bool menuAbierto)
+    {
+        if (inputModule != null)
+        {
+            inputModule.enabled = menuAbierto;
+        }
+
+        if (!menuAbierto)
+        {
+            if (laserIzquierdo != null)
+            {
+                laserIzquierdo.enabled = false;
+            }
+            if (laserDerecho != null) 
+            { 
+                laserDerecho.enabled = false; 
+            }
+            return;
+        }
+
+        MonitorClinico.ModoControl modo = MonitorClinico.ModoControl.Derecho;
+        if (MonitorClinico.Instancia != null)
+        {
+            modo = MonitorClinico.Instancia.modoActual;
+        }
+
+        if (modo == MonitorClinico.ModoControl.Izquierdo)
+        {
+            if (laserIzquierdo != null)
+            {
+                laserIzquierdo.enabled = true;
+            }
+            if (laserDerecho != null)
+            {
+                laserDerecho.enabled = false;
+            }
+            if (inputModule != null)
+            {
+                inputModule.rayTransform = laserIzquierdo.transform;
+            }
+        }
+        else if (modo == MonitorClinico.ModoControl.Derecho)
+        {
+            if (laserIzquierdo != null) 
+            {
+                laserIzquierdo.enabled = false;
+            }
+            if (laserDerecho != null)
+            {
+                laserDerecho.enabled = true;
+            }
+            if (inputModule != null)
+            {
+                inputModule.rayTransform = laserDerecho.transform;
+            }
+        }
+        else
+        {
+            if (laserIzquierdo != null)
+            {
+                laserIzquierdo.enabled = true;
+            }
+            if (laserDerecho != null)
+            {
+                laserDerecho.enabled = true;
+            }
+            if (inputModule != null)
+            {
+                inputModule.rayTransform = laserDerecho.transform;
+            }
+        }
+    }
+
     public void BotonUI_AvanzarDesdeBienvenida()
     {
         primeraVezAbierto = false;
@@ -130,7 +260,6 @@ public class ControladorMenuVR : MonoBehaviour
         CambiarNivel(0);
     }
 
-    // Botones del panel de Niveles
     public void CambiarNivel(int direccion)
     {
         if (GestorArkanoid.Instancia == null) return;
@@ -138,8 +267,14 @@ public class ControladorMenuVR : MonoBehaviour
         int totalNiveles = GestorArkanoid.Instancia.listaDeNiveles.Length;
         nivelSeleccionado += direccion;
 
-        if (nivelSeleccionado < 0) nivelSeleccionado = totalNiveles - 1;
-        if (nivelSeleccionado >= totalNiveles) nivelSeleccionado = 0;
+        if (nivelSeleccionado < 0)
+        {
+            nivelSeleccionado = totalNiveles - 1;
+        }
+        if (nivelSeleccionado >= totalNiveles)
+        {
+            nivelSeleccionado = 0;
+        }
 
         textoNumNivel.text = "NIVEL " + (nivelSeleccionado + 1);
         GestorArkanoid.Instancia.CargarPrevisualizacion(nivelSeleccionado);
@@ -148,10 +283,9 @@ public class ControladorMenuVR : MonoBehaviour
     public void BotonUI_Jugar()
     {
         GestorArkanoid.Instancia.EmpezarPartidaDesdeMenu();
-        AlternarMenuGeneral(); // Cierra el menú
+        AlternarMenuGeneral();
     }
 
-    // Botones del panel de Pausa
     public void BotonUI_Reiniciar()
     {
         GestorArkanoid.Instancia.ReiniciarNivelActual();
@@ -164,13 +298,18 @@ public class ControladorMenuVR : MonoBehaviour
         AbrirPanel(panelNiveles);
     }
 
-    // Botones de navegación hacia Ajustes
-    public void BotonUI_IrAAjustes() { 
-        AbrirPanel(panelAjustes); 
-    }
+    public void BotonUI_IrAAjustes() { AbrirPanel(panelAjustes); }
+
     public void BotonUI_VolverAAjustesAnterior()
     {
-        if (!GestorArkanoid.Instancia.juegoEmpezado) AbrirPanel(panelNiveles);
+        if (primeraVezAbierto)
+        {
+            AbrirPanel(panelBienvenida);
+        }
+        else if (GestorArkanoid.Instancia != null && !GestorArkanoid.Instancia.juegoEmpezado)
+        {
+            AbrirPanel(panelNiveles);
+        }
         else AbrirPanel(panelPausa);
     }
 
