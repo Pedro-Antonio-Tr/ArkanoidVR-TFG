@@ -34,6 +34,9 @@ public class ControladorMenuVR : MonoBehaviour
     public TextMeshProUGUI textoStatsClinicas;
     private int nivelSeleccionado = 0;
 
+    [Header("Ajustes de Sonido")] // En un futuro a lo mejor añado para música también
+    public Slider sliderVolumen;
+
     private bool primeraVezAbierto = true;
 
     void Start()
@@ -45,6 +48,10 @@ public class ControladorMenuVR : MonoBehaviour
 
         ActualizarLaseres(true);
         ActualizarBotonesModo();
+        if (sliderVolumen != null)
+        {
+            sliderVolumen.value = AudioListener.volume;
+        }
     }
 
     void Update()
@@ -322,5 +329,10 @@ public class ControladorMenuVR : MonoBehaviour
             string romDer = Mathf.Abs(GestorArkanoid.Instancia.controladorPala.maxEstiramientoDerecha).ToString("F2");
             textoStatsClinicas.text = $"ROM ACTIVO\nIzq: {romIzq} | Der: {romDer}";
         }
+    }
+
+    public void CambiarVolumenGeneral()
+    {
+        if (sliderVolumen != null) AudioListener.volume = sliderVolumen.value;
     }
 }
