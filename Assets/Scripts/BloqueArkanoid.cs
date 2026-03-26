@@ -8,6 +8,10 @@ public class BloqueArkanoid : MonoBehaviour
     [Tooltip("Pon aquí los materiales. Índice 0 = 1 Vida, Índice 1 = 2 Vidas...")]
     public Material[] materialesPorVida;
 
+    [Header("Mejoras")]
+    public GameObject prefabMejoraMultibola;
+    [Range(0f, 100f)] public float probabilidadMejora = 5f;
+
     private MeshRenderer renderizador;
 
     void Start()
@@ -29,6 +33,15 @@ public class BloqueArkanoid : MonoBehaviour
             if (puntosDeVida <= 0)
             {
                 FindFirstObjectByType<GestorArkanoid>().BloqueDestruido();
+                if (prefabMejoraMultibola != null)
+                {
+                    float tirada = Random.Range(0f, 100f);
+                    if (tirada <= probabilidadMejora)
+                    {
+                        // Lo instanciamos en la posición del bloque
+                        Instantiate(prefabMejoraMultibola, transform.position, Quaternion.identity, transform.parent);
+                    }
+                }
                 Destroy(gameObject);
             }
             else

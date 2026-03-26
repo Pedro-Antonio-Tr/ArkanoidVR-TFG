@@ -181,4 +181,26 @@ public class GestorArkanoid : MonoBehaviour
         Time.timeScale = 1f;
         cronometroActivo = true;
     }
+
+    public void DuplicarPelotas()
+    {
+        GameObject[] pelotasActuales = GameObject.FindGameObjectsWithTag("Pelota");
+
+        foreach (GameObject pelota in pelotasActuales)
+        {
+            GameObject nuevaPelota = Instantiate(prefabPelota, pelota.transform.position, Quaternion.identity, transform);
+
+            Rigidbody rbOriginal = pelota.GetComponent<Rigidbody>();
+            Rigidbody rbNueva = nuevaPelota.GetComponent<Rigidbody>();
+
+            if (rbOriginal != null && rbNueva != null)
+            {
+                // Invertimos su velocidad en el eje X para que salgan en "V"
+                Vector3 velOriginal = rbOriginal.linearVelocity;
+                rbNueva.linearVelocity = new Vector3(-velOriginal.x, velOriginal.y, 0f);
+            }
+
+            RegistrarPelota(); 
+        }
+    }
 }
