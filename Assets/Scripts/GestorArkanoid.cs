@@ -87,6 +87,7 @@ public class GestorArkanoid : MonoBehaviour
 
     IEnumerator RutinaInicioPartida()
     {
+        CargarPrevisualizacion(nivelElegido);
         juegoEmpezado = true;
         cronometroActivo = false;
 

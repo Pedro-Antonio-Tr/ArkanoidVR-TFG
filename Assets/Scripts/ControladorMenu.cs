@@ -41,6 +41,7 @@ public class ControladorMenuVR : MonoBehaviour
         panelMenu.SetActive(true);
         AbrirPanel(panelBienvenida);
         ColocarMenuDelanteDeLaMirada();
+        laserDerecho.enabled = true;
 
         ActualizarLaseres(true);
         ActualizarBotonesModo();
