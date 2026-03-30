@@ -18,7 +18,6 @@ public class PunteroLaserVR : MonoBehaviour
         laser.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
         laser.receiveShadows = false;
 
-        OnDisable(); 
     }
 
     void Update()

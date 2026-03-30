@@ -10176,7 +10176,6 @@ MonoBehaviour:
   modoActual: 1
   mandoIzquierdo: {fileID: 1532971759}
   mandoDerecho: {fileID: 1257666076}
-  palaVR: {fileID: 859417126}
   tiempoMandoIzquierdo: 0
   tiempoMandoDerecho: 0
   tiempoAmbosMandos: 0

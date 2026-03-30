@@ -7,7 +7,7 @@ public class MejoraMultibola : MonoBehaviour
 
     void Update()
     {
-        transform.Translate(Vector3.down * velocidadCaida * Time.deltaTime, Space.Self);
+        transform.Translate(Vector3.down * velocidadCaida * Time.deltaTime, Space.World);
 
         if (transform.localPosition.y < limiteInferiorY)
         {

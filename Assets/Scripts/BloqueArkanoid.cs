@@ -12,11 +12,20 @@ public class BloqueArkanoid : MonoBehaviour
     public GameObject prefabMejoraMultibola;
     [Range(0f, 100f)] public float probabilidadMejora = 5f;
 
+    [Header("Efectos Visuales")]
+    public Material materialGolpe;
+    private Color colorOriginal;
+    private Renderer meshRenderer;
+
     private MeshRenderer renderizador;
 
     void Start()
     {
         renderizador = GetComponent<MeshRenderer>();
+        if(renderizador != null)
+        {
+            colorOriginal = renderizador.material.color;
+        }
         ActualizarColor();
     }
 
@@ -28,6 +37,7 @@ public class BloqueArkanoid : MonoBehaviour
             {
                 MonitorClinico.Instancia.IniciarMedicionReaccion();
             }
+
             puntosDeVida--;
 
             if (puntosDeVida <= 0)
@@ -38,17 +48,34 @@ public class BloqueArkanoid : MonoBehaviour
                     float tirada = Random.Range(0f, 100f);
                     if (tirada <= probabilidadMejora)
                     {
-                        // Lo instanciamos en la posición del bloque
-                        Instantiate(prefabMejoraMultibola, transform.position, Quaternion.identity, transform.parent);
+                        Instantiate(prefabMejoraMultibola, transform.position, Quaternion.Euler(0f, 0f, 45f), transform.parent);
                     }
                 }
                 Destroy(gameObject);
             }
             else
             {
-                ActualizarColor();
+                StartCoroutine(GolpeNoLetal());
             }
         }
+    }
+
+    private System.Collections.IEnumerator GolpeNoLetal()
+    {
+
+        if (renderizador != null)
+        {
+            renderizador.material = materialGolpe;
+        }
+
+        yield return new WaitForSeconds(0.1f);
+
+        if (renderizador != null)
+        {
+            renderizador.material = materialGolpe;
+        }
+
+        ActualizarColor();
     }
 
     void ActualizarColor()

@@ -5,6 +5,7 @@ MonoImporter:
   serializedVersion: 2
   defaultReferences:
   - prefabMejoraMultibola: {fileID: 8003317929429712390, guid: 0ee6dd61c885703488caf7dfe75501c0, type: 3}
+  - materialGolpe: {fileID: 2100000, guid: 36466da1992796340899ca8c907a2b60, type: 2}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

@@ -15,7 +15,6 @@ public class MonitorClinico : MonoBehaviour
     [Header("Referencias (Trackers)")]
     public Transform mandoIzquierdo;
     public Transform mandoDerecho;
-    public ControladorPalaVR palaVR;
 
     [Header("Métricas Recopiladas")]
     public float tiempoMandoIzquierdo = 0f;
@@ -94,11 +93,22 @@ public class MonitorClinico : MonoBehaviour
 
     void ComprobarReaccion()
     {
-        if (midiendoReaccion && palaVR != null)
+        if (midiendoReaccion)
         {
-            // Si la pala se mueve a una velocidad significativa (ha reaccionado)
-            float velocidadPala = Mathf.Abs(palaVR.GetComponent<Rigidbody>().linearVelocity.x);
-            if (velocidadPala > 0.5f)
+            float velocidadMovimiento = 0f;
+
+            // Leemos la velocidad real de la mano en el eje X usando la API de Meta
+            if (modoActual == ModoControl.Derecho || modoActual == ModoControl.Ambos)
+            {
+                velocidadMovimiento = Mathf.Abs(OVRInput.GetLocalControllerVelocity(OVRInput.Controller.RTouch).x);
+            }
+            else if (modoActual == ModoControl.Izquierdo)
+            {
+                velocidadMovimiento = Mathf.Abs(OVRInput.GetLocalControllerVelocity(OVRInput.Controller.LTouch).x);
+            }
+
+            // Si la mano se mueve a una velocidad significativa (0.2 metros/segundo), ha reaccionado
+            if (velocidadMovimiento > 0.2f)
             {
                 float tiempoReaccion = Time.time - tiempoInicioReaccion;
                 tiemposDeReaccion.Add(tiempoReaccion);

@@ -130,3 +130,4 @@ MonoBehaviour:
   - {fileID: 2100000, guid: 314ffff0515a798408b37b61f6a4739c, type: 2}
   prefabMejoraMultibola: {fileID: 8003317929429712390, guid: 0ee6dd61c885703488caf7dfe75501c0, type: 3}
   probabilidadMejora: 5
+  materialGolpe: {fileID: 2100000, guid: 36466da1992796340899ca8c907a2b60, type: 2}

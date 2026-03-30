@@ -26,7 +26,7 @@ public class ControladorMenuVR : MonoBehaviour
 
     [Header("Centrado de Vista")]
     public Transform pantallaArkanoid;
-    public float distanciaPantallaArkanoid = 4f;
+    public float distanciaPantallaArkanoid = 3.5f;
     public float distanciaMenu = 1.8f;
 
     [Header("Referencias UI Antiguas (Niveles)")]
@@ -44,7 +44,6 @@ public class ControladorMenuVR : MonoBehaviour
         panelMenu.SetActive(true);
         AbrirPanel(panelBienvenida);
         ColocarMenuDelanteDeLaMirada();
-        laserDerecho.enabled = true;
 
         ActualizarLaseres(true);
         ActualizarBotonesModo();
