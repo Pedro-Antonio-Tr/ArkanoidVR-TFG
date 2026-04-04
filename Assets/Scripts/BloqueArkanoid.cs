@@ -14,19 +14,14 @@ public class BloqueArkanoid : MonoBehaviour
 
     [Header("Efectos Visuales")]
     public Material materialGolpe;
-    private Color colorOriginal;
-    private Renderer meshRenderer;
 
     private MeshRenderer renderizador;
+    private Material materialOriginal;
 
     void Start()
     {
         renderizador = GetComponent<MeshRenderer>();
-        if(renderizador != null)
-        {
-            colorOriginal = renderizador.material.color;
-        }
-        ActualizarColor();
+        materialOriginal = renderizador.material;
     }
 
     void OnCollisionEnter(Collision collision)
@@ -72,7 +67,7 @@ public class BloqueArkanoid : MonoBehaviour
 
         if (renderizador != null)
         {
-            renderizador.material = materialGolpe;
+            renderizador.material = materialOriginal;
         }
 
         ActualizarColor();
