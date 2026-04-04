@@ -43,7 +43,7 @@ public class BloqueArkanoid : MonoBehaviour
                     float tirada = Random.Range(0f, 100f);
                     if (tirada <= probabilidadMejora)
                     {
-                        Instantiate(prefabMejoraMultibola, transform.position, Quaternion.Euler(0f, 0f, 45f), transform.parent);
+                        Instantiate(prefabMejoraMultibola, transform.position, Quaternion.Euler(0f, 0f, -45f), transform.parent);
                     }
                 }
                 Destroy(gameObject);
