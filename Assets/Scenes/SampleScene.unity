@@ -20106,6 +20106,10 @@ MonoBehaviour:
   - {fileID: 5182462589194849825, guid: 09b9f243876dcfe4c92c333d6bb6791e, type: 3}
   - {fileID: 6543523485455343359, guid: 5d24ec544ba35c540b6ddf65d42a8c5c, type: 3}
   - {fileID: 4511105787174757584, guid: e5e0ac25e2cbe7446ae536e3754fc661, type: 3}
+  - {fileID: 4239534742870796239, guid: b4d9c42f3a01b8b41998e5e27eefe538, type: 3}
+  - {fileID: 127648839192702200, guid: 37172e14b9574084cbbb20a3b8f7b4e4, type: 3}
+  - {fileID: 7987660543670120827, guid: a6dcba7c0747d2c45a124cd92346be78, type: 3}
+  - {fileID: 2599432327706980216, guid: a4d7ca7f74f939547ae86859de34dea3, type: 3}
   nivelElegido: 1
   textoMensajes: {fileID: 426286023}
   textoEstadisticas: {fileID: 669598183}
