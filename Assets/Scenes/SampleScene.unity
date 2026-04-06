@@ -20110,6 +20110,7 @@ MonoBehaviour:
   - {fileID: 127648839192702200, guid: 37172e14b9574084cbbb20a3b8f7b4e4, type: 3}
   - {fileID: 7987660543670120827, guid: a6dcba7c0747d2c45a124cd92346be78, type: 3}
   - {fileID: 2599432327706980216, guid: a4d7ca7f74f939547ae86859de34dea3, type: 3}
+  - {fileID: 1954170586230764795, guid: 7af6f1e86fd54174d898faf416504734, type: 3}
   nivelElegido: 1
   textoMensajes: {fileID: 426286023}
   textoEstadisticas: {fileID: 669598183}
