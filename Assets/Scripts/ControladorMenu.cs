@@ -2,7 +2,7 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 
-public class ControladorMenuVR : MonoBehaviour
+public class ControladorMenu : MonoBehaviour
 {
     [Header("Configuración Base")]
     public GameObject panelMenu;
@@ -24,6 +24,11 @@ public class ControladorMenuVR : MonoBehaviour
     public Button[] botonesMandoDer;
     public Button[] botonesMandoAmbos;
 
+    [Header("Botones de Dificultad")]
+    public Button[] botonesDifFacil;
+    public Button[] botonesDifNormal;
+    public Button[] botonesDifDificil;
+
     [Header("Centrado de Vista")]
     public Transform pantallaArkanoid;
     public float distanciaPantallaArkanoid = 3.5f;
@@ -33,6 +38,11 @@ public class ControladorMenuVR : MonoBehaviour
     public TextMeshProUGUI textoNumNivel;
     public TextMeshProUGUI textoStatsClinicas;
     private int nivelSeleccionado = 0;
+
+    [Header("Calibración de Palas")]
+    public GameObject panelCuentaAtras;
+    public TextMeshProUGUI textoCuentaAtras;
+    public ControladorPalaVR controladorPala;
 
     [Header("Ajustes de Sonido")] // En un futuro a lo mejor añado para música también
     public Slider sliderVolumen;
@@ -47,6 +57,7 @@ public class ControladorMenuVR : MonoBehaviour
 
         ActualizarLaseres(true);
         ActualizarBotonesModo();
+        ActualizarBotonesDificultad();
         if (sliderVolumen != null)
         {
             sliderVolumen.value = AudioListener.volume;
@@ -85,7 +96,7 @@ public class ControladorMenuVR : MonoBehaviour
             {
                 AbrirPanel(panelBienvenida);
             }
-            else if (GestorArkanoid.Instancia != null && !GestorArkanoid.Instancia.juegoEmpezado)
+            else if (GestorArkanoid.Instancia != null && !GestorArkanoid.Instancia.juegoEmpezado && !GestorArkanoid.Instancia.enCuentaAtras)
             {
                 AbrirPanel(panelNiveles);
             }
@@ -99,6 +110,7 @@ public class ControladorMenuVR : MonoBehaviour
 
     public void AbrirPanel(GameObject panelDestino)
     {
+        panelCuentaAtras.SetActive(false);
         panelBienvenida.SetActive(false);
         panelNiveles.SetActive(false);
         panelPausa.SetActive(false);
@@ -313,7 +325,7 @@ public class ControladorMenuVR : MonoBehaviour
         {
             AbrirPanel(panelBienvenida);
         }
-        else if (GestorArkanoid.Instancia != null && !GestorArkanoid.Instancia.juegoEmpezado)
+        else if (GestorArkanoid.Instancia != null && !GestorArkanoid.Instancia.juegoEmpezado && !GestorArkanoid.Instancia.enCuentaAtras)
         {
             AbrirPanel(panelNiveles);
         }
@@ -333,5 +345,109 @@ public class ControladorMenuVR : MonoBehaviour
     public void CambiarVolumenGeneral()
     {
         if (sliderVolumen != null) AudioListener.volume = sliderVolumen.value;
+    }
+
+    public void BotonUI_CambiarDificultad(int difElegida)
+    {
+        if (MonitorClinico.Instancia != null)
+        {
+            MonitorClinico.Instancia.dificultadActual = (MonitorClinico.NivelDificultad)difElegida;
+        }
+        ActualizarBotonesDificultad();
+    }
+
+    private void ActualizarBotonesDificultad()
+    {
+        MonitorClinico.NivelDificultad dif = MonitorClinico.NivelDificultad.Normal;
+        if (MonitorClinico.Instancia != null)
+        {
+            dif = MonitorClinico.Instancia.dificultadActual;
+        }
+
+        foreach (var btn in botonesDifFacil)
+        {
+            if (btn != null)
+            {
+                btn.interactable = (dif != MonitorClinico.NivelDificultad.Facil);
+            }
+        }
+        foreach (var btn in botonesDifNormal)
+        {
+            if (btn != null)
+            {
+                btn.interactable = (dif != MonitorClinico.NivelDificultad.Normal);
+            }
+        }
+        foreach (var btn in botonesDifDificil)
+        {
+            if (btn != null)
+            {
+                btn.interactable = (dif != MonitorClinico.NivelDificultad.Dificil);
+            }
+        }
+    }
+
+    public void BotonUI_IniciarCalibracion()
+    {
+        StartCoroutine(RutinaCalibrarCentro());
+    }
+
+    private System.Collections.IEnumerator RutinaCalibrarCentro()
+    {
+        panelAjustes.SetActive(false);
+        if (panelCuentaAtras != null)
+        {
+            panelCuentaAtras.SetActive(true);
+        }
+
+        for (int i = 3; i > 0; i--)
+        {
+            if (textoCuentaAtras != null)
+            {
+                textoCuentaAtras.text = i.ToString();
+            }
+            yield return new WaitForSecondsRealtime(1f);
+        }
+
+        if (textoCuentaAtras != null)
+        {
+            textoCuentaAtras.text = "¡CALIBRADO!";
+        }
+        yield return new WaitForSecondsRealtime(0.5f);
+
+        // Cálculo del punto intermedio según los mandos activos
+        float nuevoCentroX = 0f;
+        MonitorClinico.ModoControl modo = MonitorClinico.ModoControl.Derecho;
+        if (MonitorClinico.Instancia != null)
+        {
+            modo = MonitorClinico.Instancia.modoActual;
+        }
+
+        Vector3 posIzq = OVRInput.GetLocalControllerPosition(OVRInput.Controller.LTouch);
+        Vector3 posDer = OVRInput.GetLocalControllerPosition(OVRInput.Controller.RTouch);
+
+        if (modo == MonitorClinico.ModoControl.Izquierdo)
+        {
+            nuevoCentroX = posIzq.x;
+        }
+        else if (modo == MonitorClinico.ModoControl.Derecho)
+        {
+            nuevoCentroX = posDer.x;
+        }
+        else
+        {
+            nuevoCentroX = (posIzq.x + posDer.x) / 2f; // Media de los dos si se está jugando con ambos mandos
+        }
+
+        if (controladorPala != null)
+        {
+            controladorPala.offsetXCentrado = nuevoCentroX;
+        }
+
+        if (panelCuentaAtras != null)
+        {
+            panelCuentaAtras.SetActive(false);
+        }
+        panelAjustes.SetActive(true);
     }
 }

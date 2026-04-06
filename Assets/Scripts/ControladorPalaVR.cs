@@ -15,6 +15,9 @@ public class ControladorPalaVR : MonoBehaviour
     public float maxEstiramientoIzquierda = 0f;
     public float maxEstiramientoDerecha = 0f;
 
+    [Header("Calibración")]
+    public float offsetXCentrado = 0f;
+
     // Guardamos la posición Y y Z originales para que no se muevan hacia arriba o abajo
     private float posYBaseDer = 0f, posZBaseDer = 0f;
     private float posYBaseIzq = 0f, posZBaseIzq = 0f;
@@ -50,7 +53,7 @@ public class ControladorPalaVR : MonoBehaviour
         if (palaDerechaObj != null && palaDerechaObj.activeSelf)
         {
             Vector3 posMandoDer = OVRInput.GetLocalControllerPosition(OVRInput.Controller.RTouch);
-            float posXDer = Mathf.Clamp(posMandoDer.x * multiplicadorVelocidad, limiteIzquierdo, limiteDerecho);
+            float posXDer = Mathf.Clamp((posMandoDer.x - offsetXCentrado) * multiplicadorVelocidad, limiteIzquierdo, limiteDerecho);
 
             palaDerechaObj.transform.localPosition = new Vector3(posXDer, posYBaseDer, posZBaseDer);
             RegistrarROM(posXDer);
@@ -59,10 +62,33 @@ public class ControladorPalaVR : MonoBehaviour
         if (palaIzquierdaObj != null && palaIzquierdaObj.activeSelf)
         {
             Vector3 posMandoIzq = OVRInput.GetLocalControllerPosition(OVRInput.Controller.LTouch);
-            float posXIzq = Mathf.Clamp(posMandoIzq.x * multiplicadorVelocidad, limiteIzquierdo, limiteDerecho);
+            float posXIzq = Mathf.Clamp((posMandoIzq.x - offsetXCentrado) * multiplicadorVelocidad, limiteIzquierdo, limiteDerecho);
 
             palaIzquierdaObj.transform.localPosition = new Vector3(posXIzq, posYBaseIzq, posZBaseIzq);
             RegistrarROM(posXIzq);
+        }
+
+        // Escalar las palas según la dificultad 
+        float escalaPala = 3f; // Normal
+        if (MonitorClinico.Instancia != null)
+        {
+            if (MonitorClinico.Instancia.dificultadActual == MonitorClinico.NivelDificultad.Facil)
+            {
+                escalaPala = escalaPala * 1.5f; // 50% más grande
+            }
+            else if (MonitorClinico.Instancia.dificultadActual == MonitorClinico.NivelDificultad.Dificil)
+            {
+                escalaPala = escalaPala * 0.75f; // 25% más pequeña
+            }
+        }
+
+        if (palaDerechaObj != null)
+        {
+            palaDerechaObj.transform.localScale = new Vector3(escalaPala, 0.5f, 0.5f);
+        }
+        if (palaIzquierdaObj != null)
+        {
+            palaIzquierdaObj.transform.localScale = new Vector3(escalaPala, 0.5f, 0.5f);
         }
     }
 

@@ -14,6 +14,7 @@ public class GestorArkanoid : MonoBehaviour
     [Header("Textos de Pantalla (Holograma)")]
     public TextMeshProUGUI textoMensajes;
     public TextMeshProUGUI textoEstadisticas; // Ahora lo usaremos para el Tiempo
+    public TextMeshProUGUI textoDebug;
 
     [Header("Conexión Clínica")]
     public ControladorPalaVR controladorPala;
@@ -30,6 +31,7 @@ public class GestorArkanoid : MonoBehaviour
     // VARIABLES DE TIEMPO
     private float tiempoPartida = 0f;
     private bool cronometroActivo = false;
+    public bool enCuentaAtras = false;
     private Coroutine rutinaReanudacion;
 
     void Awake() { Instancia = this; }
@@ -38,17 +40,29 @@ public class GestorArkanoid : MonoBehaviour
     {
         textoMensajes.text = "ABRE EL MENÚ PARA EMPEZAR";
         textoEstadisticas.text = "";
+        if (textoDebug != null)
+        {
+            textoDebug.text = "";
+        }
         CargarPrevisualizacion(0); // Cargamos el Nivel 1 de fondo
     }
 
     void Update()
     {
         if (cronometroActivo) tiempoPartida += Time.deltaTime;
+        // Actualizamos el panel de debug constantemente si el juego está en marcha o en cuenta atrás
+        if (juegoEmpezado || enCuentaAtras)
+        {
+            ActualizarDebug();
+        }
     }
 
     public void CargarPrevisualizacion(int indice)
     {
-        if (nivelActualInstanciado != null) Destroy(nivelActualInstanciado);
+        if (nivelActualInstanciado != null)
+        {
+            Destroy(nivelActualInstanciado);
+        }
 
         nivelElegido = indice;
         if (listaDeNiveles.Length > 0)
@@ -70,7 +84,6 @@ public class GestorArkanoid : MonoBehaviour
     {
         Time.timeScale = 1f; // Por si venimos de la pausa
         LimpiarPelotas();
-        CargarPrevisualizacion(nivelElegido); // Regenera los bloques
         EmpezarPartidaDesdeMenu();
     }
 
@@ -78,20 +91,27 @@ public class GestorArkanoid : MonoBehaviour
     {
         Time.timeScale = 1f;
         juegoEmpezado = false;
+        enCuentaAtras = false;
         cronometroActivo = false;
         LimpiarPelotas();
         textoMensajes.text = "ABRE EL MENÚ PARA EMPEZAR";
         textoEstadisticas.text = "";
+        if (textoDebug != null)
+        {
+            textoDebug.text = "";
+        }
         CargarPrevisualizacion(nivelElegido);
     }
 
     IEnumerator RutinaInicioPartida()
     {
-        CargarPrevisualizacion(nivelElegido);
-        juegoEmpezado = true;
+        enCuentaAtras = true;
+        juegoEmpezado = false;
         cronometroActivo = false;
 
-        yield return new WaitForEndOfFrame();
+        CargarPrevisualizacion(nivelElegido);
+
+        yield return new WaitForSeconds(0.1f);
         bloquesRestantes = GameObject.FindGameObjectsWithTag("Bloque").Length;
 
         textoMensajes.text = "3";
@@ -103,10 +123,17 @@ public class GestorArkanoid : MonoBehaviour
         textoMensajes.text = "¡GO!";
 
         Instantiate(prefabPelota, puntoAparicion.position, Quaternion.identity, transform);
-        cronometroActivo = true; // Empieza a contar el tiempo
+
+        enCuentaAtras = false;
+        juegoEmpezado = true;
+        cronometroActivo = true;
 
         yield return new WaitForSeconds(1f);
-        if (textoMensajes.text == "¡GO!") textoMensajes.text = "";
+        if (textoMensajes.text == "¡GO!")
+        {
+            textoMensajes.text = "";
+        }
+        enCuentaAtras = false;
     }
 
     public void RegistrarPelota() { pelotasEnJuego++; }
@@ -152,7 +179,7 @@ public class GestorArkanoid : MonoBehaviour
 
     public void AlternarPausa(bool estaEnPausa)
     {
-        if (!juegoEmpezado) return;
+        if (!juegoEmpezado && !enCuentaAtras) return;
 
         if (rutinaReanudacion != null) StopCoroutine(rutinaReanudacion);
 
@@ -160,11 +187,20 @@ public class GestorArkanoid : MonoBehaviour
         {
             Time.timeScale = 0f;
             cronometroActivo = false;
-            textoMensajes.text = "PAUSA";
+            // No pisamos el número de la cuenta atrás si está en proceso
+            if (!enCuentaAtras) textoMensajes.text = "PAUSA";
         }
         else
         {
-            rutinaReanudacion = StartCoroutine(RutinaDescongelarTiempo());
+            if (enCuentaAtras)
+            {
+                // Si estábamos en cuenta atrás, solo devolvemos el tiempo a la normalidad
+                Time.timeScale = 1f;
+            }
+            else
+            {
+                rutinaReanudacion = StartCoroutine(RutinaDescongelarTiempo());
+            }
         }
     }
 
@@ -199,8 +235,25 @@ public class GestorArkanoid : MonoBehaviour
                 Vector3 velOriginal = rbOriginal.linearVelocity;
                 rbNueva.linearVelocity = new Vector3(-velOriginal.x, velOriginal.y, 0f);
             }
-
-            RegistrarPelota(); 
         }
+    }
+
+    void ActualizarDebug()
+    {
+        if (textoDebug == null) return;
+
+        int vidaTotal = 0;
+        GameObject[] bloques = GameObject.FindGameObjectsWithTag("Bloque");
+
+        foreach (GameObject b in bloques)
+        {
+            BloqueArkanoid scriptBloque = b.GetComponent<BloqueArkanoid>();
+            if (scriptBloque != null)
+            {
+                vidaTotal += scriptBloque.puntosDeVida;
+            }
+        }
+
+        textoDebug.text = $"Pelotas restantes: {pelotasEnJuego} | Bloques: {bloques.Length} | Vida Total: {vidaTotal}";
     }
 }

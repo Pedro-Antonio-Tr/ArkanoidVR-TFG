@@ -18,7 +18,20 @@ public class ComportamientoPelota : MonoBehaviour
 
         // Lanzar la pelota hacia arriba y en una dirección aleatoria inicial
         Vector3 direccionInicial = new Vector3(Random.Range(-1f, 1f), 1f, 0f).normalized;
-        rb.linearVelocity = direccionInicial * velocidad;
+        float velocidadFinal = velocidad;
+
+        if (MonitorClinico.Instancia != null)
+        {
+            if (MonitorClinico.Instancia.dificultadActual == MonitorClinico.NivelDificultad.Facil)
+            {
+                velocidadFinal *= 0.75f; // 25% más lenta
+            }
+            else if (MonitorClinico.Instancia.dificultadActual == MonitorClinico.NivelDificultad.Dificil)
+            {
+                velocidadFinal *= 1.3f; // 30% más rápida
+            }
+        }
+        rb.linearVelocity = direccionInicial * velocidadFinal;
     }
 
     // Update is called once per frame

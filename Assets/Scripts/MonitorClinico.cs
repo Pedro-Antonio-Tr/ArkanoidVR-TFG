@@ -8,6 +8,10 @@ public class MonitorClinico : MonoBehaviour
     public static MonitorClinico Instancia;
 
     public enum ModoControl { Izquierdo, Derecho, Ambos }
+    public enum NivelDificultad { Facil, Normal, Dificil }
+
+    [Header("Ajustes de Dificultad")]
+    public NivelDificultad dificultadActual = NivelDificultad.Normal;
 
     [Header("Configuración Actual")]
     public ModoControl modoActual = ModoControl.Derecho;
@@ -134,10 +138,10 @@ public class MonitorClinico : MonoBehaviour
             using (StreamWriter writer = new StreamWriter(ruta, false))
             {
                 // Cabeceras del CSV
-                writer.WriteLine("Fecha,Modo_Mando_Derecho,Modo_Mando_Izquierdo,Modo_Ambos_Mandos,Indice_Fatiga,Reaccion_Media");
+                writer.WriteLine("Fecha,Modo_Mando_Derecho,Modo_Mando_Izquierdo,Modo_Ambos_Mandos,Dificultad,Indice_Fatiga,Reaccion_Media");
 
                 // Datos
-                writer.WriteLine($"{fechaHora},{tiempoMandoDerecho:F2},{tiempoMandoIzquierdo:F2},{tiempoAmbosMandos:F2},{indiceFatiga:F2},{mediaReaccion:F2}");
+                writer.WriteLine($"{fechaHora},{tiempoMandoDerecho:F2},{tiempoMandoIzquierdo:F2},{tiempoAmbosMandos:F2},{dificultadActual},{indiceFatiga:F2},{mediaReaccion:F2}");
             }
             Debug.Log("¡CSV Guardado con éxito en: " + ruta + "!");
         }

@@ -41,7 +41,21 @@ public class BloqueArkanoid : MonoBehaviour
                 if (prefabMejoraMultibola != null)
                 {
                     float tirada = Random.Range(0f, 100f);
-                    if (tirada <= probabilidadMejora)
+
+                    float multiProbabilidad = 1f;
+                    if (MonitorClinico.Instancia != null)
+                    {
+                        if (MonitorClinico.Instancia.dificultadActual == MonitorClinico.NivelDificultad.Facil)
+                        {
+                            multiProbabilidad = 1.5f; 
+                        }
+                        else if (MonitorClinico.Instancia.dificultadActual == MonitorClinico.NivelDificultad.Dificil)
+                        {
+                            multiProbabilidad = 0.5f; 
+                        }
+                    }
+
+                    if (tirada <= (probabilidadMejora * multiProbabilidad))
                     {
                         Instantiate(prefabMejoraMultibola, transform.position, Quaternion.Euler(0f, 0f, -45f), transform.parent);
                     }
