@@ -150,4 +150,20 @@ public class MonitorClinico : MonoBehaviour
             Debug.LogError("Error al guardar el CSV: " + e.Message);
         }
     }
+
+    public float ObtenerMediaReaccion()
+    {
+        if (tiemposDeReaccion == null || tiemposDeReaccion.Count == 0)
+        {
+            return 0f;
+        }
+
+        float suma = 0f;
+        foreach (float t in tiemposDeReaccion)
+        {
+            suma += t;
+        }
+
+        return suma / tiemposDeReaccion.Count;
+    }
 }

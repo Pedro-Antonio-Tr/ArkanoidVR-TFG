@@ -62,13 +62,46 @@ public class ControladorMenu : MonoBehaviour
         AbrirPanel(panelBienvenida);
         ColocarMenuDelanteDeLaMirada();
 
-        ActualizarLaseres(true);
-        ActualizarBotonesModo();
-        ActualizarBotonesDificultad();
         if (sliderVolumen != null)
         {
             sliderVolumen.value = AudioListener.volume;
         }
+
+        if (GestorDatosUsuario.Instancia != null)
+        {
+            DatosConfiguracion config = GestorDatosUsuario.Instancia.configActual;
+
+            // Volumen
+            if (sliderVolumen != null)
+            {
+                sliderVolumen.value = config.volumen;
+            }
+            AudioListener.volume = config.volumen;
+
+            // Dificultad
+            if (MonitorClinico.Instancia != null)
+            {
+                MonitorClinico.Instancia.dificultadActual = (MonitorClinico.NivelDificultad)config.dificultad;
+            }
+
+            // Modo de Mando
+            if (MonitorClinico.Instancia != null)
+            {
+                MonitorClinico.Instancia.modoActual = (MonitorClinico.ModoControl)config.modoMando;
+            }
+
+            // Inclinación de Pantalla (Si ya tenía una guardada)
+            if (pantallaArkanoid != null && config.inclinacionPantallaX != 0f)
+            {
+                // Solo rotamos el eje X (cabeceo) y dejamos los demás quietos
+                Vector3 rotacionActual = pantallaArkanoid.eulerAngles;
+                pantallaArkanoid.eulerAngles = new Vector3(config.inclinacionPantallaX, rotacionActual.y, rotacionActual.z);
+            }
+        }
+
+        ActualizarLaseres(true);
+        ActualizarBotonesModo();
+        ActualizarBotonesDificultad();
     }
 
     void Update()
@@ -148,6 +181,13 @@ public class ControladorMenu : MonoBehaviour
         pantallaArkanoid.Rotate(0, 180, 0);
 
         ColocarMenuDelanteDeLaMirada();
+
+        if (GestorDatosUsuario.Instancia != null)
+        {
+            // Guardamos la rotación X (inclinación hacia arriba/abajo) de la pantalla
+            GestorDatosUsuario.Instancia.configActual.inclinacionPantallaX = pantallaArkanoid.eulerAngles.x;
+            GestorDatosUsuario.Instancia.GuardarConfiguracion();
+        }
     }
 
     void ColocarMenuDelanteDeLaMirada()
@@ -179,6 +219,12 @@ public class ControladorMenu : MonoBehaviour
         }
         ActualizarLaseres(true);
         ActualizarBotonesModo();
+
+        if (GestorDatosUsuario.Instancia != null)
+        {
+            GestorDatosUsuario.Instancia.configActual.modoMando = modoElegido;
+            GestorDatosUsuario.Instancia.GuardarConfiguracion();
+        }
     }
 
     private void ActualizarBotonesModo()
@@ -332,7 +378,10 @@ public class ControladorMenu : MonoBehaviour
         AbrirPanel(panelNiveles);
     }
 
-    public void BotonUI_IrAAjustes() { AbrirPanel(panelAjustes); }
+    public void BotonUI_IrAAjustes() 
+    { 
+        AbrirPanel(panelAjustes); 
+    }
 
     public void BotonUI_VolverAAjustesAnterior()
     {
@@ -359,7 +408,16 @@ public class ControladorMenu : MonoBehaviour
 
     public void CambiarVolumenGeneral()
     {
-        if (sliderVolumen != null) AudioListener.volume = sliderVolumen.value;
+        if (sliderVolumen != null)
+        {
+            AudioListener.volume = sliderVolumen.value;
+        }
+
+        if (GestorDatosUsuario.Instancia != null && sliderVolumen != null)
+        {
+            GestorDatosUsuario.Instancia.configActual.volumen = sliderVolumen.value;
+            GestorDatosUsuario.Instancia.GuardarConfiguracion();
+        }
     }
 
     public void BotonUI_CambiarDificultad(int difElegida)
@@ -369,6 +427,12 @@ public class ControladorMenu : MonoBehaviour
             MonitorClinico.Instancia.dificultadActual = (MonitorClinico.NivelDificultad)difElegida;
         }
         ActualizarBotonesDificultad();
+
+        if (GestorDatosUsuario.Instancia != null)
+        {
+            GestorDatosUsuario.Instancia.configActual.dificultad = difElegida;
+            GestorDatosUsuario.Instancia.GuardarConfiguracion();
+        }
     }
 
     private void ActualizarBotonesDificultad()
@@ -415,54 +479,83 @@ public class ControladorMenu : MonoBehaviour
             panelCuentaAtras.SetActive(true);
         }
 
-        for (int i = 3; i > 0; i--)
+        // FASE 1: CENTRO
+        yield return EjecutarFaseCalibracion("1/3: PON LAS MANOS EN TU CENTRO Y ESPERA...");
+        float centro = ObtenerPosicionMandoActivoX();
+        GestorDatosUsuario.Instancia.configActual.centroX = centro;
+
+        // FASE 2: TOPE IZQUIERDO
+        yield return EjecutarFaseCalibracion("2/3: ESTIRA AL MÁXIMO A TU IZQUIERDA...");
+        float topeIzq = ObtenerPosicionMandoActivoX();
+        // Si no estiró suficiente, le ponemos un mínimo de 10cm para que no se rompa la física
+        if (topeIzq > centro - 0.1f)
         {
-            if (textoCuentaAtras != null)
-            {
-                textoCuentaAtras.text = i.ToString();
-            }
-            yield return new WaitForSecondsRealtime(1f);
+            topeIzq = centro - 0.1f;
         }
+        GestorDatosUsuario.Instancia.configActual.alcanceIzqX = topeIzq;
+
+        // FASE 3: TOPE DERECHO
+        yield return EjecutarFaseCalibracion("3/3: ESTIRA AL MÁXIMO A TU DERECHA...");
+        float topeDer = ObtenerPosicionMandoActivoX();
+        if (topeDer < centro + 0.1f)
+        {
+            topeDer = centro + 0.1f;
+        }
+        GestorDatosUsuario.Instancia.configActual.alcanceDerX = topeDer;
+
+        // GUARDAMOS EN EL JSON
+        GestorDatosUsuario.Instancia.GuardarConfiguracion();
 
         if (textoCuentaAtras != null)
         {
-            textoCuentaAtras.text = "¡CALIBRADO!";
+            textoCuentaAtras.text = "¡CALIBRACIÓN GUARDADA!";
         }
-        yield return new WaitForSecondsRealtime(0.5f);
-
-        // Cálculo del punto intermedio según los mandos activos
-        float nuevoCentroX = 0f;
-        MonitorClinico.ModoControl modo = MonitorClinico.ModoControl.Derecho;
-        if (MonitorClinico.Instancia != null)
-        {
-            modo = MonitorClinico.Instancia.modoActual;
-        }
-
-        Vector3 posIzq = OVRInput.GetLocalControllerPosition(OVRInput.Controller.LTouch);
-        Vector3 posDer = OVRInput.GetLocalControllerPosition(OVRInput.Controller.RTouch);
-
-        if (modo == MonitorClinico.ModoControl.Izquierdo)
-        {
-            nuevoCentroX = posIzq.x;
-        }
-        else if (modo == MonitorClinico.ModoControl.Derecho)
-        {
-            nuevoCentroX = posDer.x;
-        }
-        else
-        {
-            nuevoCentroX = (posIzq.x + posDer.x) / 2f; // Media de los dos si se está jugando con ambos mandos
-        }
-
-        if (controladorPala != null)
-        {
-            controladorPala.offsetXCentrado = nuevoCentroX;
-        }
+        ReproducirSonidoClic();
+        yield return new WaitForSecondsRealtime(1.5f);
 
         if (panelCuentaAtras != null)
         {
             panelCuentaAtras.SetActive(false);
         }
         panelAjustes.SetActive(true);
+    }
+
+    private System.Collections.IEnumerator EjecutarFaseCalibracion(string mensaje)
+    {
+        if (textoCuentaAtras != null)
+        {
+            textoCuentaAtras.text = mensaje + "\n\n3";
+        }
+        ReproducirSonidoClic();
+        yield return new WaitForSecondsRealtime(1f);
+        if (textoCuentaAtras != null)
+        {
+            textoCuentaAtras.text = mensaje + "\n\n2";
+        }
+        ReproducirSonidoClic();
+        yield return new WaitForSecondsRealtime(1f);
+        if (textoCuentaAtras != null)
+        {
+            textoCuentaAtras.text = mensaje + "\n\n1";
+        }
+        ReproducirSonidoClic();
+        yield return new WaitForSecondsRealtime(1f);
+    }
+
+    private float ObtenerPosicionMandoActivoX()
+    {
+        MonitorClinico.ModoControl modo = MonitorClinico.Instancia.modoActual;
+        float posIzq = OVRInput.GetLocalControllerPosition(OVRInput.Controller.LTouch).x;
+        float posDer = OVRInput.GetLocalControllerPosition(OVRInput.Controller.RTouch).x;
+
+        if (modo == MonitorClinico.ModoControl.Izquierdo)
+        {
+            return posIzq;
+        }
+        if (modo == MonitorClinico.ModoControl.Derecho)
+        {
+            return posDer;
+        }
+        return (posIzq + posDer) / 2f; // Si usa ambas, hacemos la media
     }
 }

@@ -52,18 +52,14 @@ public class ControladorPalaVR : MonoBehaviour
 
         if (palaDerechaObj != null && palaDerechaObj.activeSelf)
         {
-            Vector3 posMandoDer = OVRInput.GetLocalControllerPosition(OVRInput.Controller.RTouch);
-            float posXDer = Mathf.Clamp((posMandoDer.x - offsetXCentrado) * multiplicadorVelocidad, limiteIzquierdo, limiteDerecho);
-
+            float posXDer = CalcularPosicionVirtual(OVRInput.GetLocalControllerPosition(OVRInput.Controller.RTouch).x);
             palaDerechaObj.transform.localPosition = new Vector3(posXDer, posYBaseDer, posZBaseDer);
             RegistrarROM(posXDer);
         }
 
         if (palaIzquierdaObj != null && palaIzquierdaObj.activeSelf)
         {
-            Vector3 posMandoIzq = OVRInput.GetLocalControllerPosition(OVRInput.Controller.LTouch);
-            float posXIzq = Mathf.Clamp((posMandoIzq.x - offsetXCentrado) * multiplicadorVelocidad, limiteIzquierdo, limiteDerecho);
-
+            float posXIzq = CalcularPosicionVirtual(OVRInput.GetLocalControllerPosition(OVRInput.Controller.LTouch).x);
             palaIzquierdaObj.transform.localPosition = new Vector3(posXIzq, posYBaseIzq, posZBaseIzq);
             RegistrarROM(posXIzq);
         }
@@ -101,6 +97,43 @@ public class ControladorPalaVR : MonoBehaviour
         if (posX > maxEstiramientoDerecha)
         {
             maxEstiramientoDerecha = posX;
+        }
+    }
+
+    private float CalcularPosicionVirtual(float posicionFisicaX)
+    {
+        if (GestorDatosUsuario.Instancia == null) return 0f;
+
+        float centro = GestorDatosUsuario.Instancia.configActual.centroX;
+        float maxIzq = GestorDatosUsuario.Instancia.configActual.alcanceIzqX;
+        float maxDer = GestorDatosUsuario.Instancia.configActual.alcanceDerX;
+
+        // Si el mando está a la derecha del centro calibrado
+        if (posicionFisicaX >= centro)
+        {
+            float rangoFisico = maxDer - centro;
+            if (rangoFisico <= 0.05f)
+            {
+                rangoFisico = 0.05f; //Evitamos dividir por 0 o errores de rango muy pequeño
+            }
+
+            // Calculamos qué porcentaje del estiramiento ha hecho (0 a 1)
+            float porcentajeEstiramiento = Mathf.Clamp01((posicionFisicaX - centro) / rangoFisico);
+
+            // Lo multiplicamos por el tope de la pantalla del juego
+            return porcentajeEstiramiento * limiteDerecho;
+        }
+        // Si el mando está a la izquierda
+        else
+        {
+            float rangoFisico = maxIzq - centro; // Esto dará un número negativo
+            if (rangoFisico >= -0.05f)
+            {
+                rangoFisico = -0.05f;
+            }
+
+            float porcentajeEstiramiento = Mathf.Clamp01((posicionFisicaX - centro) / rangoFisico);
+            return porcentajeEstiramiento * limiteIzquierdo;
         }
     }
 }

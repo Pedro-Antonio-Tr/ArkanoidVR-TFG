@@ -187,9 +187,31 @@ public class GestorArkanoid : MonoBehaviour
         int minutos = Mathf.FloorToInt(tiempoPartida / 60F);
         int segundos = Mathf.FloorToInt(tiempoPartida - minutos * 60);
         textoEstadisticas.text = $"TIEMPO: {string.Format("{0:00}:{1:00}", minutos, segundos)}";
-        if (MonitorClinico.Instancia != null)
+        string resultado = "Derrota";
+        if (mensaje.Contains("COMPLETADO"))
         {
-            MonitorClinico.Instancia.GuardarDatosCSV();
+            resultado = "Victoria";
+        }
+        else if (mensaje.Contains("ABANDONO") || mensaje.Contains("MENU"))
+        {
+            resultado = "Abortado"; // Para cuando le da a Volver
+        }
+
+        if (GestorDatosUsuario.Instancia != null && MonitorClinico.Instancia != null)
+        {
+            string diff = GestorDatosUsuario.Instancia.configActual.dificultad.ToString();
+            float fatiga = MonitorClinico.Instancia.indiceFatiga;
+            float reaccion = MonitorClinico.Instancia.ObtenerMediaReaccion();
+
+            GestorDatosUsuario.Instancia.GuardarPartidaCSV(
+                $"Nivel {nivelElegido + 1}",
+                diff,
+                resultado,
+                bloquesRestantes,
+                fatiga,
+                reaccion,
+                tiempoPartida
+            );
         }
     }
 
