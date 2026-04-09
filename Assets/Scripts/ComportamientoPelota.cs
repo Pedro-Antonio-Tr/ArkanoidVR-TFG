@@ -11,8 +11,8 @@ public class ComportamientoPelota : MonoBehaviour
     [Header("Efectos de Sonido")]
     public AudioClip sonidoPared;
     public AudioClip sonidoPala;
+    private AudioSource audioSourceLocal;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -36,6 +36,8 @@ public class ComportamientoPelota : MonoBehaviour
             }
         }
         rb.linearVelocity = direccionInicial * velocidadFinal;
+        audioSourceLocal = gameObject.AddComponent<AudioSource>();
+        audioSourceLocal.spatialBlend = 0;
     }
 
     // Update is called once per frame
@@ -73,14 +75,14 @@ public class ComportamientoPelota : MonoBehaviour
         {
             if (sonidoPared != null)
             {
-                AudioSource.PlayClipAtPoint(sonidoPared, transform.position);
+                audioSourceLocal.PlayOneShot(sonidoPared);
             }
         }
         else if (collision.gameObject.CompareTag("Pala"))
         {
             if (sonidoPala != null)
             {
-                AudioSource.PlayClipAtPoint(sonidoPala, transform.position);
+                audioSourceLocal.PlayOneShot(sonidoPala);
             }
         }
     }

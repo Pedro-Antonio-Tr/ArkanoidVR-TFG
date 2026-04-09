@@ -21,11 +21,14 @@ public class BloqueArkanoid : MonoBehaviour
     [Header("Sonidos")]
     public AudioClip sonidoGolpe;
     public AudioClip sonidoRotura;
+    private AudioSource audioSourceLocal;
 
     void Start()
     {
         renderizador = GetComponent<MeshRenderer>();
         materialOriginal = renderizador.material;
+        audioSourceLocal = gameObject.AddComponent<AudioSource>();
+        audioSourceLocal.spatialBlend = 0;
     }
 
     void OnCollisionEnter(Collision collision)
@@ -43,7 +46,8 @@ public class BloqueArkanoid : MonoBehaviour
             {
                 if (sonidoRotura != null)
                 {
-                    AudioSource.PlayClipAtPoint(sonidoRotura, transform.position);
+                    GestorArkanoid.Instancia.ReproducirSonidoGlobal(sonidoRotura);
+                    Destroy(gameObject);
                 }
                 FindFirstObjectByType<GestorArkanoid>().BloqueDestruido();
                 if (prefabMejoraMultibola != null)
@@ -74,7 +78,7 @@ public class BloqueArkanoid : MonoBehaviour
             {
                 if (sonidoGolpe != null)
                 {
-                    AudioSource.PlayClipAtPoint(sonidoGolpe, transform.position);
+                    audioSourceLocal.PlayOneShot(sonidoGolpe);
                 }
                 StartCoroutine(GolpeNoLetal());
             }

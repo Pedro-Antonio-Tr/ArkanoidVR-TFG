@@ -2,19 +2,23 @@ using System;
 using System.IO;
 using UnityEngine;
 
-// Esta clase define qué guardamos en el JSON
 [Serializable]
 public class DatosConfiguracion
 {
     public float volumen = 0.5f;
-    public int modoMando = 1; // 0:Izq, 1:Der, 2:Ambos
-    public int dificultad = 1; // 0:Facil, 1:Normal, 2:Dificil
-
-    // Calibración Física
-    public float centroX = 0f;
-    public float alcanceIzqX = -0.3f; // Unos 30cm a la izquierda por defecto
-    public float alcanceDerX = 0.3f;  // Unos 30cm a la derecha por defecto
+    public int modoMando = 1;
+    public int dificultad = 1;
     public float inclinacionPantallaX = 0f;
+
+    // Calibración Brazo IZQUIERDO
+    public float centroX_L = 0f;
+    public float alcanceIzqX_L = -0.2f;
+    public float alcanceDerX_L = 0.2f;
+
+    // Calibración Brazo DERECHO
+    public float centroX_R = 0f;
+    public float alcanceIzqX_R = -0.2f;
+    public float alcanceDerX_R = 0.2f;
 }
 
 public class GestorDatosUsuario : MonoBehaviour

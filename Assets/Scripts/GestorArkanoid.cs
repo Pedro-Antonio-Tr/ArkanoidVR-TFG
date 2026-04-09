@@ -301,4 +301,32 @@ public class GestorArkanoid : MonoBehaviour
 
         textoDebug.text = $"Pelotas restantes: {pelotasEnJuego} | Bloques: {bloques.Length} | Vida Total: {vidaTotal}";
     }
+
+    public void ReproducirSonidoGlobal(AudioClip clip)
+    {
+        if (clip != null)
+        {
+            audioSourceUI.PlayOneShot(clip);
+        }
+    }
+
+    public string ObtenerTiempoFormateado()
+    {
+        int minutos = Mathf.FloorToInt(tiempoPartida / 60F);
+        int segundos = Mathf.FloorToInt(tiempoPartida - minutos * 60);
+        return string.Format("{0:00}:{1:00}", minutos, segundos);
+    }
+
+    public int ObtenerVidaTotalBloques()
+    {
+        int vidaTotal = 0;
+        GameObject[] bloques = GameObject.FindGameObjectsWithTag("Bloque");
+
+        foreach (GameObject b in bloques)
+        {
+            BloqueArkanoid scriptBloque = b.GetComponent<BloqueArkanoid>();
+            if (scriptBloque != null) vidaTotal += scriptBloque.puntosDeVida;
+        }
+        return vidaTotal;
+    }
 }

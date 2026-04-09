@@ -42,6 +42,7 @@ public class ControladorMenu : MonoBehaviour
     [Header("Calibración de Palas")]
     public GameObject panelCuentaAtras;
     public TextMeshProUGUI textoCuentaAtras;
+    public TextMeshProUGUI textoInstrucciones;
     public ControladorPalaVR controladorPala;
 
     [Header("Ajustes de Sonido")] // En un futuro a lo mejor añado para música también
@@ -398,11 +399,22 @@ public class ControladorMenu : MonoBehaviour
 
     void ActualizarStatsPausa()
     {
-        if (GestorArkanoid.Instancia != null && GestorArkanoid.Instancia.controladorPala != null)
+        if (GestorArkanoid.Instancia != null && MonitorClinico.Instancia != null)
         {
-            string romIzq = Mathf.Abs(GestorArkanoid.Instancia.controladorPala.maxEstiramientoIzquierda).ToString("F2");
-            string romDer = Mathf.Abs(GestorArkanoid.Instancia.controladorPala.maxEstiramientoDerecha).ToString("F2");
-            textoStatsClinicas.text = $"ROM ACTIVO\nIzq: {romIzq} | Der: {romDer}";
+            string nivelStr = "NIVEL " + (GestorArkanoid.Instancia.nivelElegido + 1);
+            string difStr = MonitorClinico.Instancia.dificultadActual.ToString().ToUpper();
+            string tiempoStr = GestorArkanoid.Instancia.ObtenerTiempoFormateado();
+            int bloques = GestorArkanoid.Instancia.bloquesRestantes;
+            int vidaTotal = GestorArkanoid.Instancia.ObtenerVidaTotalBloques();
+
+            if (textoStatsClinicas != null)
+            {
+                textoStatsClinicas.text =
+                    $"<color=#FFD700>{nivelStr}</color> | DIFICULTAD: {difStr}\n\n" +
+                    $"TIEMPO DE JUEGO: {tiempoStr}\n" +
+                    $"BLOQUES RESTANTES: {bloques}\n" +
+                    $"VIDA TOTAL RESTANTE: {vidaTotal}";
+            }
         }
     }
 
@@ -474,88 +486,67 @@ public class ControladorMenu : MonoBehaviour
     private System.Collections.IEnumerator RutinaCalibrarCentro()
     {
         panelAjustes.SetActive(false);
-        if (panelCuentaAtras != null)
+        panelCuentaAtras.SetActive(true);
+
+        MonitorClinico.ModoControl modo = MonitorClinico.Instancia.modoActual;
+
+        // Si el modo es "Ambos", calibramos primero un brazo y luego el otro
+        if (modo == MonitorClinico.ModoControl.Ambos)
         {
-            panelCuentaAtras.SetActive(true);
+            yield return CalibrarBrazoCompleto(OVRInput.Controller.LTouch, "BRAZO IZQUIERDO");
+
+            yield return CalibrarBrazoCompleto(OVRInput.Controller.RTouch, "BRAZO DERECHO");
+        }
+        else
+        {
+            OVRInput.Controller mando = (modo == MonitorClinico.ModoControl.Izquierdo) ? OVRInput.Controller.LTouch : OVRInput.Controller.RTouch;
+            yield return CalibrarBrazoCompleto(mando, "CALIBRACIÓN");
         }
 
-        // FASE 1: CENTRO
-        yield return EjecutarFaseCalibracion("1/3: PON LAS MANOS EN TU CENTRO Y ESPERA...");
-        float centro = ObtenerPosicionMandoActivoX();
-        GestorDatosUsuario.Instancia.configActual.centroX = centro;
-
-        // FASE 2: TOPE IZQUIERDO
-        yield return EjecutarFaseCalibracion("2/3: ESTIRA AL MÁXIMO A TU IZQUIERDA...");
-        float topeIzq = ObtenerPosicionMandoActivoX();
-        // Si no estiró suficiente, le ponemos un mínimo de 10cm para que no se rompa la física
-        if (topeIzq > centro - 0.1f)
-        {
-            topeIzq = centro - 0.1f;
-        }
-        GestorDatosUsuario.Instancia.configActual.alcanceIzqX = topeIzq;
-
-        // FASE 3: TOPE DERECHO
-        yield return EjecutarFaseCalibracion("3/3: ESTIRA AL MÁXIMO A TU DERECHA...");
-        float topeDer = ObtenerPosicionMandoActivoX();
-        if (topeDer < centro + 0.1f)
-        {
-            topeDer = centro + 0.1f;
-        }
-        GestorDatosUsuario.Instancia.configActual.alcanceDerX = topeDer;
-
-        // GUARDAMOS EN EL JSON
         GestorDatosUsuario.Instancia.GuardarConfiguracion();
+        textoInstrucciones.text = "¡CALIBRACIÓN COMPLETA!";
+        textoCuentaAtras.text = "";
+        yield return new WaitForSecondsRealtime(2f);
 
-        if (textoCuentaAtras != null)
-        {
-            textoCuentaAtras.text = "¡CALIBRACIÓN GUARDADA!";
-        }
-        ReproducirSonidoClic();
-        yield return new WaitForSecondsRealtime(1.5f);
-
-        if (panelCuentaAtras != null)
-        {
-            panelCuentaAtras.SetActive(false);
-        }
+        panelCuentaAtras.SetActive(false);
         panelAjustes.SetActive(true);
     }
 
-    private System.Collections.IEnumerator EjecutarFaseCalibracion(string mensaje)
+    private System.Collections.IEnumerator CalibrarBrazoCompleto(OVRInput.Controller mando, string nombreBrazo)
     {
-        if (textoCuentaAtras != null)
+        yield return FaseContador(nombreBrazo + ": PON EL MANDO EN EL CENTRO");
+        float centro = OVRInput.GetLocalControllerPosition(mando).x;
+
+        yield return FaseContador(nombreBrazo + ": ESTIRA A LA IZQUIERDA");
+        float izq = OVRInput.GetLocalControllerPosition(mando).x;
+
+        yield return FaseContador(nombreBrazo + ": ESTIRA A LA DERECHA");
+        float der = OVRInput.GetLocalControllerPosition(mando).x;
+
+        if (mando == OVRInput.Controller.LTouch)
         {
-            textoCuentaAtras.text = mensaje + "\n\n3";
+            GestorDatosUsuario.Instancia.configActual.centroX_L = centro;
+            GestorDatosUsuario.Instancia.configActual.alcanceIzqX_L = izq;
+            GestorDatosUsuario.Instancia.configActual.alcanceDerX_L = der;
         }
-        ReproducirSonidoClic();
-        yield return new WaitForSecondsRealtime(1f);
-        if (textoCuentaAtras != null)
+        else
         {
-            textoCuentaAtras.text = mensaje + "\n\n2";
+            GestorDatosUsuario.Instancia.configActual.centroX_R = centro;
+            GestorDatosUsuario.Instancia.configActual.alcanceIzqX_R = izq;
+            GestorDatosUsuario.Instancia.configActual.alcanceDerX_R = der;
         }
-        ReproducirSonidoClic();
-        yield return new WaitForSecondsRealtime(1f);
-        if (textoCuentaAtras != null)
-        {
-            textoCuentaAtras.text = mensaje + "\n\n1";
-        }
-        ReproducirSonidoClic();
-        yield return new WaitForSecondsRealtime(1f);
     }
 
-    private float ObtenerPosicionMandoActivoX()
+    private System.Collections.IEnumerator FaseContador(string instruccion)
     {
-        MonitorClinico.ModoControl modo = MonitorClinico.Instancia.modoActual;
-        float posIzq = OVRInput.GetLocalControllerPosition(OVRInput.Controller.LTouch).x;
-        float posDer = OVRInput.GetLocalControllerPosition(OVRInput.Controller.RTouch).x;
-
-        if (modo == MonitorClinico.ModoControl.Izquierdo)
+        textoInstrucciones.text = instruccion;
+        for (int i = 5; i > 0; i--) 
         {
-            return posIzq;
+            textoCuentaAtras.text = i.ToString();
+            ReproducirSonidoClic();
+            yield return new WaitForSecondsRealtime(1f);
         }
-        if (modo == MonitorClinico.ModoControl.Derecho)
-        {
-            return posDer;
-        }
-        return (posIzq + posDer) / 2f; // Si usa ambas, hacemos la media
+        textoCuentaAtras.text = "OK";
+        yield return new WaitForSecondsRealtime(0.5f);
     }
 }

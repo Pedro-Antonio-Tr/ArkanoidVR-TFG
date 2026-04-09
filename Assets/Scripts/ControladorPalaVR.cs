@@ -15,9 +15,6 @@ public class ControladorPalaVR : MonoBehaviour
     public float maxEstiramientoIzquierda = 0f;
     public float maxEstiramientoDerecha = 0f;
 
-    [Header("Calibración")]
-    public float offsetXCentrado = 0f;
-
     // Guardamos la posición Y y Z originales para que no se muevan hacia arriba o abajo
     private float posYBaseDer = 0f, posZBaseDer = 0f;
     private float posYBaseIzq = 0f, posZBaseIzq = 0f;
@@ -52,14 +49,15 @@ public class ControladorPalaVR : MonoBehaviour
 
         if (palaDerechaObj != null && palaDerechaObj.activeSelf)
         {
-            float posXDer = CalcularPosicionVirtual(OVRInput.GetLocalControllerPosition(OVRInput.Controller.RTouch).x);
+            // Le pasamos "false" porque NO es el izquierdo
+            float posXDer = CalcularPosicionVirtual(OVRInput.GetLocalControllerPosition(OVRInput.Controller.RTouch).x, false);
             palaDerechaObj.transform.localPosition = new Vector3(posXDer, posYBaseDer, posZBaseDer);
             RegistrarROM(posXDer);
         }
 
         if (palaIzquierdaObj != null && palaIzquierdaObj.activeSelf)
         {
-            float posXIzq = CalcularPosicionVirtual(OVRInput.GetLocalControllerPosition(OVRInput.Controller.LTouch).x);
+            float posXIzq = CalcularPosicionVirtual(OVRInput.GetLocalControllerPosition(OVRInput.Controller.LTouch).x, true);
             palaIzquierdaObj.transform.localPosition = new Vector3(posXIzq, posYBaseIzq, posZBaseIzq);
             RegistrarROM(posXIzq);
         }
@@ -70,11 +68,11 @@ public class ControladorPalaVR : MonoBehaviour
         {
             if (MonitorClinico.Instancia.dificultadActual == MonitorClinico.NivelDificultad.Facil)
             {
-                escalaPala = escalaPala * 1.5f; // 50% más grande
+                escalaPala = escalaPala * 1.5f;
             }
             else if (MonitorClinico.Instancia.dificultadActual == MonitorClinico.NivelDificultad.Dificil)
             {
-                escalaPala = escalaPala * 0.75f; // 25% más pequeña
+                escalaPala = escalaPala * 0.75f;
             }
         }
 
@@ -100,33 +98,29 @@ public class ControladorPalaVR : MonoBehaviour
         }
     }
 
-    private float CalcularPosicionVirtual(float posicionFisicaX)
+    private float CalcularPosicionVirtual(float posicionFisicaX, bool esIzquierdo)
     {
         if (GestorDatosUsuario.Instancia == null) return 0f;
 
-        float centro = GestorDatosUsuario.Instancia.configActual.centroX;
-        float maxIzq = GestorDatosUsuario.Instancia.configActual.alcanceIzqX;
-        float maxDer = GestorDatosUsuario.Instancia.configActual.alcanceDerX;
+        float centro = esIzquierdo ? GestorDatosUsuario.Instancia.configActual.centroX_L : GestorDatosUsuario.Instancia.configActual.centroX_R;
+        float maxIzq = esIzquierdo ? GestorDatosUsuario.Instancia.configActual.alcanceIzqX_L : GestorDatosUsuario.Instancia.configActual.alcanceIzqX_R;
+        float maxDer = esIzquierdo ? GestorDatosUsuario.Instancia.configActual.alcanceDerX_L : GestorDatosUsuario.Instancia.configActual.alcanceDerX_R;
 
-        // Si el mando está a la derecha del centro calibrado
         if (posicionFisicaX >= centro)
         {
             float rangoFisico = maxDer - centro;
             if (rangoFisico <= 0.05f)
             {
-                rangoFisico = 0.05f; //Evitamos dividir por 0 o errores de rango muy pequeño
+                rangoFisico = 0.05f;
             }
 
-            // Calculamos qué porcentaje del estiramiento ha hecho (0 a 1)
             float porcentajeEstiramiento = Mathf.Clamp01((posicionFisicaX - centro) / rangoFisico);
 
-            // Lo multiplicamos por el tope de la pantalla del juego
             return porcentajeEstiramiento * limiteDerecho;
         }
-        // Si el mando está a la izquierda
         else
         {
-            float rangoFisico = maxIzq - centro; // Esto dará un número negativo
+            float rangoFisico = maxIzq - centro;
             if (rangoFisico >= -0.05f)
             {
                 rangoFisico = -0.05f;

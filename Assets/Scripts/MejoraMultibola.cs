@@ -26,7 +26,8 @@ public class MejoraMultibola : MonoBehaviour
             }
             if (sonidoMejora != null)
             {
-                AudioSource.PlayClipAtPoint(sonidoMejora, transform.position);
+                GestorArkanoid.Instancia.ReproducirSonidoGlobal(sonidoMejora);
+                Destroy(gameObject);
             }
             Destroy(gameObject);
         }
