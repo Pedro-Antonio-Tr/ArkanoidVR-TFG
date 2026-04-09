@@ -28,6 +28,11 @@ public class GestorArkanoid : MonoBehaviour
     public int bloquesRestantes = 0;
     public bool juegoEmpezado = false;
 
+    [Header("Sonidos Interfaz")]
+    public AudioClip sonidoCuentaAtras;
+    public AudioClip sonidoGo;
+    private AudioSource audioSourceUI; // El reproductor
+
     // VARIABLES DE TIEMPO
     private float tiempoPartida = 0f;
     private bool cronometroActivo = false;
@@ -40,6 +45,8 @@ public class GestorArkanoid : MonoBehaviour
     {
         textoMensajes.text = "ABRE EL MENÚ PARA EMPEZAR";
         textoEstadisticas.text = "";
+        audioSourceUI = gameObject.AddComponent<AudioSource>();
+        audioSourceUI.playOnAwake = false;
         if (textoDebug != null)
         {
             textoDebug.text = "";
@@ -115,12 +122,28 @@ public class GestorArkanoid : MonoBehaviour
         bloquesRestantes = GameObject.FindGameObjectsWithTag("Bloque").Length;
 
         textoMensajes.text = "3";
+        if (sonidoCuentaAtras != null)
+        {
+            audioSourceUI.PlayOneShot(sonidoCuentaAtras);
+        }
         yield return new WaitForSeconds(1f);
         textoMensajes.text = "2";
+        if (sonidoCuentaAtras != null)
+        {
+            audioSourceUI.PlayOneShot(sonidoCuentaAtras);
+        }
         yield return new WaitForSeconds(1f);
         textoMensajes.text = "1";
+        if (sonidoCuentaAtras != null)
+        {
+            audioSourceUI.PlayOneShot(sonidoCuentaAtras);
+        }
         yield return new WaitForSeconds(1f);
         textoMensajes.text = "¡GO!";
+        if (sonidoGo != null)
+        {
+            audioSourceUI.PlayOneShot(sonidoGo);
+        }
 
         Instantiate(prefabPelota, puntoAparicion.position, Quaternion.identity, transform);
 

@@ -133,3 +133,5 @@ MonoBehaviour:
   prefabMejoraMultibola: {fileID: 8003317929429712390, guid: 0ee6dd61c885703488caf7dfe75501c0, type: 3}
   probabilidadMejora: 15
   materialGolpe: {fileID: 2100000, guid: 36466da1992796340899ca8c907a2b60, type: 2}
+  sonidoGolpe: {fileID: 8300000, guid: 8412d2ab897bce54dbc81d6f3a3dca57, type: 3}
+  sonidoRotura: {fileID: 8300000, guid: 03b355f04da1ff34a99d05e415d8adb0, type: 3}

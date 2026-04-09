@@ -128,6 +128,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MejoraMultibola
   velocidadCaida: 5
   limiteInferiorY: -10
+  sonidoMejora: {fileID: 8300000, guid: 6418d263b220710459a31afebcc8f487, type: 3}
 --- !u!54 &7024727153710483000
 Rigidbody:
   m_ObjectHideFlags: 0

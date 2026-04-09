@@ -4,6 +4,7 @@ public class MejoraMultibola : MonoBehaviour
 {
     public float velocidadCaida = 5f;
     public float limiteInferiorY = -10f;
+    public AudioClip sonidoMejora;
 
     void Update()
     {
@@ -22,6 +23,10 @@ public class MejoraMultibola : MonoBehaviour
             if (GestorArkanoid.Instancia != null)
             {
                 GestorArkanoid.Instancia.DuplicarPelotas();
+            }
+            if (sonidoMejora != null)
+            {
+                AudioSource.PlayClipAtPoint(sonidoMejora, transform.position);
             }
             Destroy(gameObject);
         }

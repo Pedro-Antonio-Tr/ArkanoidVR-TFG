@@ -47,10 +47,17 @@ public class ControladorMenu : MonoBehaviour
     [Header("Ajustes de Sonido")] // En un futuro a lo mejor añado para música también
     public Slider sliderVolumen;
 
+    [Header("Sonidos de Interfaz")]
+    public AudioClip sonidoBoton;
+    private AudioSource audioSourceMenu;
+
     private bool primeraVezAbierto = true;
 
     void Start()
     {
+        audioSourceMenu = gameObject.AddComponent<AudioSource>();
+        audioSourceMenu.playOnAwake = false;
+        audioSourceMenu.ignoreListenerPause = true;
         panelMenu.SetActive(true);
         AbrirPanel(panelBienvenida);
         ColocarMenuDelanteDeLaMirada();
@@ -71,6 +78,14 @@ public class ControladorMenu : MonoBehaviour
             OVRInput.GetDown(OVRInput.Button.Start))
         {
             AlternarMenuGeneral();
+        }
+    }
+
+    public void ReproducirSonidoClic()
+    {
+        if (sonidoBoton != null && audioSourceMenu != null)
+        {
+            audioSourceMenu.PlayOneShot(sonidoBoton);
         }
     }
 

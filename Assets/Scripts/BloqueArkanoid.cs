@@ -18,6 +18,10 @@ public class BloqueArkanoid : MonoBehaviour
     private MeshRenderer renderizador;
     private Material materialOriginal;
 
+    [Header("Sonidos")]
+    public AudioClip sonidoGolpe;
+    public AudioClip sonidoRotura;
+
     void Start()
     {
         renderizador = GetComponent<MeshRenderer>();
@@ -37,6 +41,10 @@ public class BloqueArkanoid : MonoBehaviour
 
             if (puntosDeVida <= 0)
             {
+                if (sonidoRotura != null)
+                {
+                    AudioSource.PlayClipAtPoint(sonidoRotura, transform.position);
+                }
                 FindFirstObjectByType<GestorArkanoid>().BloqueDestruido();
                 if (prefabMejoraMultibola != null)
                 {
@@ -64,6 +72,10 @@ public class BloqueArkanoid : MonoBehaviour
             }
             else
             {
+                if (sonidoGolpe != null)
+                {
+                    AudioSource.PlayClipAtPoint(sonidoGolpe, transform.position);
+                }
                 StartCoroutine(GolpeNoLetal());
             }
         }

@@ -1,2 +1,13 @@
 fileFormatVersion: 2
 guid: d0adcd7ec7eedc64e991e34f834fc3fc
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - sonidoPared: {fileID: 8300000, guid: e614150bdfdd79f4eaa3bcd8dd787142, type: 3}
+  - sonidoPala: {fileID: 8300000, guid: c65b4928a7cfebf42852d6892e5331ab, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

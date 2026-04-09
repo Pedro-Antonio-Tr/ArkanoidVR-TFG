@@ -156,6 +156,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ComportamientoPelota
   velocidad: 15
   limiteInferiorY: -9
+  sonidoPared: {fileID: 8300000, guid: e614150bdfdd79f4eaa3bcd8dd787142, type: 3}
+  sonidoPala: {fileID: 8300000, guid: c65b4928a7cfebf42852d6892e5331ab, type: 3}
 --- !u!96 &3623483779140908523
 TrailRenderer:
   serializedVersion: 4

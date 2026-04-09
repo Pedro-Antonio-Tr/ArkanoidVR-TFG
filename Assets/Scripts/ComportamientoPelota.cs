@@ -8,6 +8,10 @@ public class ComportamientoPelota : MonoBehaviour
     private Rigidbody rb;
     private GestorArkanoid gestor;
 
+    [Header("Efectos de Sonido")]
+    public AudioClip sonidoPared;
+    public AudioClip sonidoPala;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -60,6 +64,24 @@ public class ComportamientoPelota : MonoBehaviour
         {
             if (gestor != null) gestor.PelotaDestruida();
             Destroy(gameObject);
+        }
+    }
+
+    void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Pared"))
+        {
+            if (sonidoPared != null)
+            {
+                AudioSource.PlayClipAtPoint(sonidoPared, transform.position);
+            }
+        }
+        else if (collision.gameObject.CompareTag("Pala"))
+        {
+            if (sonidoPala != null)
+            {
+                AudioSource.PlayClipAtPoint(sonidoPala, transform.position);
+            }
         }
     }
 }
