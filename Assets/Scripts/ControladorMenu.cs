@@ -4,6 +4,8 @@ using UnityEngine.UI;
 
 public class ControladorMenu : MonoBehaviour
 {
+    public static ControladorMenu Instancia;
+
     [Header("Configuración Base")]
     public GameObject panelMenu;
     public Transform headAnchor;
@@ -548,5 +550,23 @@ public class ControladorMenu : MonoBehaviour
         }
         textoCuentaAtras.text = "OK";
         yield return new WaitForSecondsRealtime(0.5f);
+    }
+
+    public void MostrarResultadosFinales(string titulo)
+    {
+        panelMenu.SetActive(true);
+        AbrirPanel(panelPausa);
+
+        if (textoStatsClinicas != null)
+        {
+            string tiempo = GestorArkanoid.Instancia.ObtenerTiempoFormateado();
+            string nivel = "NIVEL " + (GestorArkanoid.Instancia.nivelElegido + 1);
+            int bloques = GestorArkanoid.Instancia.bloquesRestantes;
+
+            textoStatsClinicas.text = $"<size=120%>{titulo}</size>\n\n" +
+                                     $"{nivel} | TIEMPO: {tiempo}\n" +
+                                     $"BLOQUES RESTANTES: {bloques}";
+        }
+        ActualizarLaseres(true);
     }
 }

@@ -10,6 +10,7 @@ public class BloqueArkanoid : MonoBehaviour
 
     [Header("Mejoras")]
     public GameObject prefabMejoraMultibola;
+    public GameObject prefabMejoraExplosiva;
     [Range(0f, 100f)] public float probabilidadMejora = 5f;
 
     [Header("Efectos Visuales")]
@@ -35,53 +36,7 @@ public class BloqueArkanoid : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Pelota"))
         {
-            if (MonitorClinico.Instancia != null)
-            {
-                MonitorClinico.Instancia.IniciarMedicionReaccion();
-            }
-
-            puntosDeVida--;
-
-            if (puntosDeVida <= 0)
-            {
-                if (sonidoRotura != null)
-                {
-                    GestorArkanoid.Instancia.ReproducirSonidoGlobal(sonidoRotura);
-                    Destroy(gameObject);
-                }
-                FindFirstObjectByType<GestorArkanoid>().BloqueDestruido();
-                if (prefabMejoraMultibola != null)
-                {
-                    float tirada = Random.Range(0f, 100f);
-
-                    float multiProbabilidad = 1f;
-                    if (MonitorClinico.Instancia != null)
-                    {
-                        if (MonitorClinico.Instancia.dificultadActual == MonitorClinico.NivelDificultad.Facil)
-                        {
-                            multiProbabilidad = 1.5f; 
-                        }
-                        else if (MonitorClinico.Instancia.dificultadActual == MonitorClinico.NivelDificultad.Dificil)
-                        {
-                            multiProbabilidad = 0.5f; 
-                        }
-                    }
-
-                    if (tirada <= (probabilidadMejora * multiProbabilidad))
-                    {
-                        Instantiate(prefabMejoraMultibola, transform.position, Quaternion.Euler(0f, 0f, -45f), transform.parent);
-                    }
-                }
-                Destroy(gameObject);
-            }
-            else
-            {
-                if (sonidoGolpe != null)
-                {
-                    audioSourceLocal.PlayOneShot(sonidoGolpe);
-                }
-                StartCoroutine(GolpeNoLetal());
-            }
+            GolpearBloque();
         }
     }
 
@@ -116,6 +71,63 @@ public class BloqueArkanoid : MonoBehaviour
             {
                 renderizador.material = materialesPorVida[indiceMaterial];
             }
+        }
+    }
+
+    public void RecibirDanoExplosion()
+    {
+        GolpearBloque();
+    }
+
+    public void GolpearBloque()
+    {
+        puntosDeVida--;
+
+        if (puntosDeVida <= 0)
+        {
+            if (sonidoRotura != null)
+            {
+                GestorArkanoid.Instancia.ReproducirSonidoGlobal(sonidoRotura);
+                Destroy(gameObject);
+            }
+            FindFirstObjectByType<GestorArkanoid>().BloqueDestruido();
+
+            if (prefabMejoraMultibola != null)
+            {
+                float tirada = Random.Range(0f, 100f);
+
+                float multiProbabilidad = 1f;
+                if (MonitorClinico.Instancia != null)
+                {
+                    if (MonitorClinico.Instancia.dificultadActual == MonitorClinico.NivelDificultad.Facil)
+                    {
+                        multiProbabilidad = 1.5f;
+                    }
+                    else if (MonitorClinico.Instancia.dificultadActual == MonitorClinico.NivelDificultad.Dificil)
+                    {
+                        multiProbabilidad = 0.5f;
+                    }
+                }
+                tirada = tirada * multiProbabilidad;
+
+                if (tirada <= probabilidadMejora)
+                {
+                    Instantiate(prefabMejoraMultibola, transform.position, Quaternion.Euler(0f, 0f, -45f), transform.parent);
+                }
+                else if (tirada <= probabilidadMejora * 2 && prefabMejoraExplosiva != null)
+                {
+                    Instantiate(prefabMejoraExplosiva, transform.position, Quaternion.Euler(0f, 0f, -45f), transform.parent);
+                }
+                Destroy(gameObject);
+            }
+        }
+        else
+        {
+            if (sonidoGolpe != null)
+            {
+                audioSourceLocal.PlayOneShot(sonidoGolpe);
+            }
+            StartCoroutine(GolpeNoLetal());
         }
     }
 }

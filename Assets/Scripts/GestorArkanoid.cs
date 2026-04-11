@@ -32,6 +32,13 @@ public class GestorArkanoid : MonoBehaviour
     public AudioClip sonidoCuentaAtras;
     public AudioClip sonidoGo;
     private AudioSource audioSourceUI; // El reproductor
+    public AudioClip sonidoVictoria;
+    public AudioClip sonidoDerrota;
+
+    [Header("Mejora Explosiva")]
+    public bool explosivoActivo = false;
+    public float tiempoExplosivoRestante = 0f;
+    public AudioClip sonidoExplosion;
 
     // VARIABLES DE TIEMPO
     private float tiempoPartida = 0f;
@@ -56,8 +63,20 @@ public class GestorArkanoid : MonoBehaviour
 
     void Update()
     {
-        if (cronometroActivo) tiempoPartida += Time.deltaTime;
-        // Actualizamos el panel de debug constantemente si el juego está en marcha o en cuenta atrás
+        if (cronometroActivo)
+        {
+            tiempoPartida += Time.deltaTime;
+        }
+
+        if (explosivoActivo)
+        {
+            tiempoExplosivoRestante -= Time.deltaTime;
+            if (tiempoExplosivoRestante <= 0)
+            {
+                explosivoActivo = false;
+            }
+        }
+
         if (juegoEmpezado || enCuentaAtras)
         {
             ActualizarDebug();
@@ -190,11 +209,16 @@ public class GestorArkanoid : MonoBehaviour
         string resultado = "Derrota";
         if (mensaje.Contains("COMPLETADO"))
         {
+            ReproducirSonidoGlobal(sonidoVictoria);
             resultado = "Victoria";
         }
         else if (mensaje.Contains("ABANDONO") || mensaje.Contains("MENU"))
         {
             resultado = "Abortado"; // Para cuando le da a Volver
+        }
+        else
+        {
+            ReproducirSonidoGlobal(sonidoDerrota);
         }
 
         if (GestorDatosUsuario.Instancia != null && MonitorClinico.Instancia != null)
@@ -213,6 +237,7 @@ public class GestorArkanoid : MonoBehaviour
                 tiempoPartida
             );
         }
+        ControladorMenu.Instancia.MostrarResultadosFinales(mensaje);
     }
 
     void LimpiarPelotas()

@@ -13,8 +13,19 @@ public class ComportamientoPelota : MonoBehaviour
     public AudioClip sonidoPala;
     private AudioSource audioSourceLocal;
 
+    [Header("Visuales Explosivos")]
+    public Material matExplosivo;
+    private Material matOriginal;
+    private MeshRenderer rendererPelota;
+
+    [Header("Ajustes Explosión")]
+    public float radioExplosion = 5f;
+    public GameObject prefabEfectoExplosion;
+
     void Start()
     {
+        rendererPelota = GetComponent<MeshRenderer>();
+        matOriginal = rendererPelota.material;
         rb = GetComponent<Rigidbody>();
         gestor = FindFirstObjectByType<GestorArkanoid>();
 
@@ -67,6 +78,7 @@ public class ComportamientoPelota : MonoBehaviour
             if (gestor != null) gestor.PelotaDestruida();
             Destroy(gameObject);
         }
+        ActualizarVisualesExplosivos();
     }
 
     void OnCollisionEnter(Collision collision)
@@ -75,14 +87,73 @@ public class ComportamientoPelota : MonoBehaviour
         {
             if (sonidoPared != null)
             {
-                audioSourceLocal.PlayOneShot(sonidoPared);
+                if (GestorArkanoid.Instancia.explosivoActivo)
+                {
+                    EjecutarExplosion();
+                }
+                else
+                {
+                    audioSourceLocal.PlayOneShot(sonidoPared);
+                }
             }
         }
         else if (collision.gameObject.CompareTag("Pala"))
         {
             if (sonidoPala != null)
             {
-                audioSourceLocal.PlayOneShot(sonidoPala);
+                if (GestorArkanoid.Instancia.explosivoActivo)
+                {
+                    EjecutarExplosion();
+                }
+                else
+                {
+                    audioSourceLocal.PlayOneShot(sonidoPala);
+                }
+            }
+        }
+    }
+
+    void ActualizarVisualesExplosivos()
+    {
+        if (GestorArkanoid.Instancia.explosivoActivo)
+        {
+            float tiempo = GestorArkanoid.Instancia.tiempoExplosivoRestante;
+
+            if (tiempo > 1.5f)
+            {
+                rendererPelota.material = matExplosivo;
+            }
+            else // Parpadeo final (cada vez más rápido)
+            {
+                float velocidadParpadeo = Mathf.Lerp(15f, 2f, tiempo / 1.5f);
+                rendererPelota.material = (Mathf.Sin(Time.time * velocidadParpadeo) > 0) ? matExplosivo : matOriginal;
+            }
+        }
+        else
+        {
+            rendererPelota.material = matOriginal;
+        }
+    }
+
+    void EjecutarExplosion()
+    {
+        GestorArkanoid.Instancia.ReproducirSonidoGlobal(GestorArkanoid.Instancia.sonidoExplosion);
+
+        if (prefabEfectoExplosion != null)
+        {
+            Instantiate(prefabEfectoExplosion, transform.position, Quaternion.identity);
+        }
+
+        Collider[] objetosCercanos = Physics.OverlapSphere(transform.position, radioExplosion);
+        foreach (Collider col in objetosCercanos)
+        {
+            if (col.CompareTag("Bloque"))
+            {
+                BloqueArkanoid bloque = col.GetComponent<BloqueArkanoid>();
+                if (bloque != null)
+                {
+                    bloque.RecibirDanoExplosion();
+                }
             }
         }
     }

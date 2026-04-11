@@ -21848,6 +21848,11 @@ MonoBehaviour:
   juegoEmpezado: 0
   sonidoCuentaAtras: {fileID: 8300000, guid: a4027b73e0b2c6542a72b2327fe8ff11, type: 3}
   sonidoGo: {fileID: 8300000, guid: ac95866ca17d57442b62be674067fa2d, type: 3}
+  sonidoVictoria: {fileID: 0}
+  sonidoDerrota: {fileID: 0}
+  explosivoActivo: 0
+  tiempoExplosivoRestante: 0
+  sonidoExplosion: {fileID: 0}
   enCuentaAtras: 0
 --- !u!1 &1425848930
 GameObject:
