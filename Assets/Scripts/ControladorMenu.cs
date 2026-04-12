@@ -62,6 +62,7 @@ public class ControladorMenu : MonoBehaviour
     public GameObject pantallaCurva;
 
     private bool primeraVezAbierto = true;
+    private bool calibracionEnProceso = false;
 
     void Start()
     {
@@ -144,7 +145,7 @@ public class ControladorMenu : MonoBehaviour
 
     public void AlternarMenuGeneral()
     {
-        if (panelMenu == null || headAnchor == null) return;
+        if (panelMenu == null || headAnchor == null || calibracionEnProceso) return;
 
         bool estaActivado = !panelMenu.activeSelf;
         panelMenu.SetActive(estaActivado);
@@ -504,6 +505,7 @@ public class ControladorMenu : MonoBehaviour
 
     private System.Collections.IEnumerator RutinaCalibrarCentro()
     {
+        calibracionEnProceso = true;
         panelAjustes.SetActive(false);
         panelCuentaAtras.SetActive(true);
 
@@ -529,6 +531,7 @@ public class ControladorMenu : MonoBehaviour
 
         panelCuentaAtras.SetActive(false);
         panelAjustes.SetActive(true);
+        calibracionEnProceso = false;
     }
 
     private System.Collections.IEnumerator CalibrarBrazoCompleto(OVRInput.Controller mando, string nombreBrazo)
