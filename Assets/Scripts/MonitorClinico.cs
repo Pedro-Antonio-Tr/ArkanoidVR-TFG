@@ -26,6 +26,10 @@ public class MonitorClinico : MonoBehaviour
     public float tiempoAmbosMandos = 0f;
     public float indiceFatiga = 0f; // Acumulación de micro-temblores
 
+    [Header("Registro de golpes con cada mano")]
+    public int golpesIzquierda = 0;
+    public int golpesDerecha = 0;
+
     // Tiempos de reacción
     private List<float> tiemposDeReaccion = new List<float>();
     private bool midiendoReaccion = false;
@@ -165,5 +169,17 @@ public class MonitorClinico : MonoBehaviour
         }
 
         return suma / tiemposDeReaccion.Count;
+    }
+
+    public void RegistrarGolpePala(bool esIzquierda)
+    {
+        if (esIzquierda) golpesIzquierda++;
+        else golpesDerecha++;
+    }
+
+    public void ReiniciarContadoresLateralidad()
+    {
+        golpesIzquierda = 0;
+        golpesDerecha = 0;
     }
 }

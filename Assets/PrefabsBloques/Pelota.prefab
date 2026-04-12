@@ -31,7 +31,7 @@ Transform:
   m_GameObject: {fileID: 6306325649414794681}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -7, z: 0}
+  m_LocalPosition: {x: 2.1212227, y: -7.9810314, z: 0}
   m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -158,6 +158,9 @@ MonoBehaviour:
   limiteInferiorY: -9
   sonidoPared: {fileID: 8300000, guid: e614150bdfdd79f4eaa3bcd8dd787142, type: 3}
   sonidoPala: {fileID: 8300000, guid: c65b4928a7cfebf42852d6892e5331ab, type: 3}
+  matExplosivo: {fileID: 2100000, guid: f1718e65075489d49a1b9a7a128113c4, type: 2}
+  radioExplosion: 5
+  prefabEfectoExplosion: {fileID: 6095401668142476946, guid: 16db551c96aa38b4aa6a700e69953d13, type: 3}
 --- !u!96 &3623483779140908523
 TrailRenderer:
   serializedVersion: 4

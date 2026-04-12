@@ -130,6 +130,7 @@ MonoBehaviour:
   - {fileID: 2100000, guid: 314ffff0515a798408b37b61f6a4739c, type: 2}
   - {fileID: 2100000, guid: 17b5a8fc40bbcfb45a429a782f8776e6, type: 2}
   prefabMejoraMultibola: {fileID: 8003317929429712390, guid: 0ee6dd61c885703488caf7dfe75501c0, type: 3}
+  prefabMejoraExplosiva: {fileID: 6005623413829986501, guid: 012c18a8fdac5e542bbaf51dd6b2326c, type: 3}
   probabilidadMejora: 10
   materialGolpe: {fileID: 2100000, guid: 36466da1992796340899ca8c907a2b60, type: 2}
   sonidoGolpe: {fileID: 8300000, guid: 8412d2ab897bce54dbc81d6f3a3dca57, type: 3}

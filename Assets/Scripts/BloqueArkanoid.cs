@@ -92,7 +92,7 @@ public class BloqueArkanoid : MonoBehaviour
             }
             FindFirstObjectByType<GestorArkanoid>().BloqueDestruido();
 
-            if (prefabMejoraMultibola != null)
+            if (prefabMejoraMultibola != null || prefabMejoraExplosiva != null)
             {
                 float tirada = Random.Range(0f, 100f);
 
@@ -108,13 +108,20 @@ public class BloqueArkanoid : MonoBehaviour
                         multiProbabilidad = 0.5f;
                     }
                 }
-                tirada = tirada * multiProbabilidad;
+                float topeProbabilidad = probabilidadMejora * multiProbabilidad;
 
-                if (tirada <= probabilidadMejora)
+                if (GestorArkanoid.Instancia != null)
+                {
+                    GestorArkanoid.Instancia.ActualizarTextoRNG(
+                        $"Último RNG: {tirada:F1} | Para Multibola: < {topeProbabilidad:F1} | Para Explosiva: < {topeProbabilidad * 2:F1}"
+                    );
+                }
+
+                if (tirada <= topeProbabilidad && prefabMejoraMultibola != null)
                 {
                     Instantiate(prefabMejoraMultibola, transform.position, Quaternion.Euler(0f, 0f, -45f), transform.parent);
                 }
-                else if (tirada <= probabilidadMejora * 2 && prefabMejoraExplosiva != null)
+                else if (tirada <= topeProbabilidad * 2 && prefabMejoraExplosiva != null)
                 {
                     Instantiate(prefabMejoraExplosiva, transform.position, Quaternion.Euler(0f, 0f, -45f), transform.parent);
                 }

@@ -54,6 +54,13 @@ public class ControladorMenu : MonoBehaviour
     public AudioClip sonidoBoton;
     private AudioSource audioSourceMenu;
 
+    [Header("Pantalla")]
+    public Toggle togglePantallaCurva;
+
+    [Header("Pantallas Físicas")]
+    public GameObject pantallaPlana;
+    public GameObject pantallaCurva;
+
     private bool primeraVezAbierto = true;
 
     void Start()
@@ -100,6 +107,16 @@ public class ControladorMenu : MonoBehaviour
                 Vector3 rotacionActual = pantallaArkanoid.eulerAngles;
                 pantallaArkanoid.eulerAngles = new Vector3(config.inclinacionPantallaX, rotacionActual.y, rotacionActual.z);
             }
+
+            bool esCurva = config.pantallaCurva;
+            if (togglePantallaCurva != null)
+            {
+                togglePantallaCurva.isOn = esCurva;
+            }
+
+            // El código correcto
+            if (pantallaPlana != null) pantallaPlana.SetActive(!esCurva);
+            if (pantallaCurva != null) pantallaCurva.SetActive(esCurva);
         }
 
         ActualizarLaseres(true);
@@ -568,5 +585,20 @@ public class ControladorMenu : MonoBehaviour
                                      $"BLOQUES RESTANTES: {bloques}";
         }
         ActualizarLaseres(true);
+    }
+
+    public void CambiarCurvaturaPantalla()
+    {
+        bool activarCurva = togglePantallaCurva.isOn;
+        // Guardamos en el perfil del paciente
+        if (GestorDatosUsuario.Instancia != null)
+        {
+            GestorDatosUsuario.Instancia.configActual.pantallaCurva = activarCurva;
+            GestorDatosUsuario.Instancia.GuardarConfiguracion();
+        }
+
+        // Aplicamos a la pantalla
+        if (pantallaPlana != null) pantallaPlana.SetActive(!activarCurva);
+        if (pantallaCurva != null) pantallaCurva.SetActive(activarCurva);
     }
 }

@@ -39,11 +39,11 @@ public class ComportamientoPelota : MonoBehaviour
         {
             if (MonitorClinico.Instancia.dificultadActual == MonitorClinico.NivelDificultad.Facil)
             {
-                velocidadFinal *= 0.75f; // 25% más lenta
+                velocidadFinal *= 0.5f; // 50% más lenta
             }
             else if (MonitorClinico.Instancia.dificultadActual == MonitorClinico.NivelDificultad.Dificil)
             {
-                velocidadFinal *= 1.3f; // 30% más rápida
+                velocidadFinal *= 1.5f; // 50% más rápida
             }
         }
         rb.linearVelocity = direccionInicial * velocidadFinal;
@@ -69,6 +69,12 @@ public class ComportamientoPelota : MonoBehaviour
             // Le damos un "empujoncito" artificial de 2 unidades en la dirección que ya llevaba
             // (Si iba un poco hacia arriba, la subimos más; si iba hacia abajo, la bajamos más)
             velActual.y = (velActual.y >= 0) ? 2f : -2f;
+            rb.linearVelocity = velActual;
+        }
+        // Igual pero para la velocidad horizontal (X),
+        if (Mathf.Abs(velActual.x) < 1.5f) // Con 1.5f es suficiente para que el ángulo varíe y salga de la trampa
+        {
+            velActual.x = (velActual.x >= 0) ? 1.5f : -1.5f;
             rb.linearVelocity = velActual;
         }
 
@@ -99,21 +105,27 @@ public class ComportamientoPelota : MonoBehaviour
         }
         else if (collision.gameObject.CompareTag("Pala"))
         {
+            bool esIzquierda = collision.gameObject.name.Contains("Izquierda");
+
+            if (MonitorClinico.Instancia != null)
+            {
+                MonitorClinico.Instancia.RegistrarGolpePala(esIzquierda);
+            }
             if (sonidoPala != null)
             {
-                if (GestorArkanoid.Instancia.explosivoActivo)
-                {
-                    EjecutarExplosion();
-                }
-                else
-                {
-                    audioSourceLocal.PlayOneShot(sonidoPala);
-                }
+                audioSourceLocal.PlayOneShot(sonidoPala);
+            }
+        }
+        else if (collision.gameObject.CompareTag("Bloque"))
+        {
+            if (GestorArkanoid.Instancia.explosivoActivo)
+            {
+                EjecutarExplosion();
             }
         }
     }
 
-    void ActualizarVisualesExplosivos()
+    public void ActualizarVisualesExplosivos()
     {
         if (GestorArkanoid.Instancia.explosivoActivo)
         {

@@ -10,6 +10,8 @@ public class DatosConfiguracion
     public int dificultad = 1;
     public float inclinacionPantallaX = 0f;
 
+    public bool pantallaCurva = false;
+
     // Calibración Brazo IZQUIERDO
     public float centroX_L = 0f;
     public float alcanceIzqX_L = -0.2f;
@@ -75,7 +77,7 @@ public class GestorDatosUsuario : MonoBehaviour
         }
     }
 
-    public void GuardarPartidaCSV(string nivel, string dificultad, string resultado, int bloques, float fatiga, float reaccion, float duracion)
+    public void GuardarPartidaCSV(string nivel, string dificultad, string resultado, int bloques, float fatiga, float reaccion, float duracion, int golpesI, int golpesD)
     {
         string ruta = Path.Combine(RutaUsuario, "historial_partidas.csv");
         bool existe = File.Exists(ruta);
@@ -85,9 +87,9 @@ public class GestorDatosUsuario : MonoBehaviour
             if (!existe)
             {
                 // Cabecera la primera vez que se crea el archivo del paciente
-                sw.WriteLine("FechaHora,Nivel,Dificultad,Duracion(s),Resultado,BloquesRestantes,IndiceFatiga,ReaccionMedia(s)");
+                sw.WriteLine("FechaHora,Nivel,Dificultad,Duracion(s),Resultado,BloquesRestantes,IndiceFatiga,ReaccionMedia(s),Golpes_IZQ,Golpes_DER");
             }
-            sw.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss},{nivel},{dificultad},{duracion:F1},{resultado},{bloques},{fatiga:F2},{reaccion:F2}");
+            sw.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss},{nivel},{dificultad},{duracion:F1},{resultado},{bloques},{fatiga:F2},{reaccion:F2},{golpesI},{golpesD}");
         }
         Debug.Log("Partida guardada en Historial de: " + idUsuario);
     }

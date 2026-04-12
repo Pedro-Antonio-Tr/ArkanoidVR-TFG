@@ -37,6 +37,7 @@ public class GestorArkanoid : MonoBehaviour
 
     [Header("Mejora Explosiva")]
     public bool explosivoActivo = false;
+    public float duracionExplosivo = 5f;
     public float tiempoExplosivoRestante = 0f;
     public AudioClip sonidoExplosion;
 
@@ -45,6 +46,8 @@ public class GestorArkanoid : MonoBehaviour
     private bool cronometroActivo = false;
     public bool enCuentaAtras = false;
     private Coroutine rutinaReanudacion;
+    private bool yaTerminado = false;
+    private string logRNG = "---";
 
     void Awake() { Instancia = this; }
 
@@ -134,6 +137,11 @@ public class GestorArkanoid : MonoBehaviour
         enCuentaAtras = true;
         juegoEmpezado = false;
         cronometroActivo = false;
+        yaTerminado = false;
+        if (MonitorClinico.Instancia != null)
+        {
+            MonitorClinico.Instancia.ReiniciarContadoresLateralidad();
+        }
 
         CargarPrevisualizacion(nivelElegido);
 
@@ -198,6 +206,8 @@ public class GestorArkanoid : MonoBehaviour
 
     void TerminarPartida(string mensaje)
     {
+        if (yaTerminado) return;
+        yaTerminado = true;
         cronometroActivo = false;
         juegoEmpezado = false;
         textoMensajes.text = mensaje;
@@ -226,6 +236,8 @@ public class GestorArkanoid : MonoBehaviour
             string diff = GestorDatosUsuario.Instancia.configActual.dificultad.ToString();
             float fatiga = MonitorClinico.Instancia.indiceFatiga;
             float reaccion = MonitorClinico.Instancia.ObtenerMediaReaccion();
+            int golpesI = MonitorClinico.Instancia.golpesIzquierda;
+            int golpesD = MonitorClinico.Instancia.golpesDerecha;
 
             GestorDatosUsuario.Instancia.GuardarPartidaCSV(
                 $"Nivel {nivelElegido + 1}",
@@ -234,7 +246,9 @@ public class GestorArkanoid : MonoBehaviour
                 bloquesRestantes,
                 fatiga,
                 reaccion,
-                tiempoPartida
+                tiempoPartida,
+                golpesI,
+                golpesD
             );
         }
         ControladorMenu.Instancia.MostrarResultadosFinales(mensaje);
@@ -324,7 +338,7 @@ public class GestorArkanoid : MonoBehaviour
             }
         }
 
-        textoDebug.text = $"Pelotas restantes: {pelotasEnJuego} | Bloques: {bloques.Length} | Vida Total: {vidaTotal}";
+        textoDebug.text = $"Pelotas restantes: {pelotasEnJuego} | Bloques: {bloques.Length} | Vida Total: {vidaTotal} | {logRNG}";
     }
 
     public void ReproducirSonidoGlobal(AudioClip clip)
@@ -353,5 +367,26 @@ public class GestorArkanoid : MonoBehaviour
             if (scriptBloque != null) vidaTotal += scriptBloque.puntosDeVida;
         }
         return vidaTotal;
+    }
+
+    public void ActivarExplosivo()
+    {
+        explosivoActivo = true;
+        tiempoExplosivoRestante = duracionExplosivo;
+        // Cambiamos el material de las pelotas a explosivo
+        GameObject[] pelotas = GameObject.FindGameObjectsWithTag("Pelota");
+        foreach (GameObject p in pelotas)
+        {
+            ComportamientoPelota scriptPelota = p.GetComponent<ComportamientoPelota>();
+            if (scriptPelota != null)
+            {
+                scriptPelota.ActualizarVisualesExplosivos();
+            }
+        }
+    }
+
+    public void ActualizarTextoRNG(string nuevoLog)
+    {
+        logRNG = nuevoLog;
     }
 }

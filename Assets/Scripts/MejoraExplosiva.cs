@@ -1,9 +1,12 @@
 using UnityEngine;
 
-public class MejoraMultibola : MonoBehaviour
+public class MejoraExplosiva : MonoBehaviour
 {
+    [Header("Ajustes de Caída")]
     public float velocidadCaida = 5f;
     public float limiteInferiorY = -10f;
+
+    [Header("Audio")]
     public AudioClip sonidoMejora;
 
     void Update()
@@ -22,11 +25,12 @@ public class MejoraMultibola : MonoBehaviour
         {
             if (GestorArkanoid.Instancia != null)
             {
-                GestorArkanoid.Instancia.DuplicarPelotas();
-            }
-            if (sonidoMejora != null)
-            {
-                GestorArkanoid.Instancia.ReproducirSonidoGlobal(sonidoMejora);
+                GestorArkanoid.Instancia.ActivarExplosivo();
+
+                if (sonidoMejora != null)
+                {
+                    GestorArkanoid.Instancia.ReproducirSonidoGlobal(sonidoMejora);
+                }
             }
             Destroy(gameObject);
         }
