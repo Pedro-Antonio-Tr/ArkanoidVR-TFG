@@ -574,6 +574,7 @@ public class ControladorMenu : MonoBehaviour
 
     public void MostrarResultadosFinales(string titulo)
     {
+        AlternarMenuGeneral();
         panelMenu.SetActive(true);
         AbrirPanel(panelPausa);
 
