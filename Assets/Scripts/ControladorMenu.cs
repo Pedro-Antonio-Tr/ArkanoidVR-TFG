@@ -64,6 +64,10 @@ public class ControladorMenu : MonoBehaviour
     private bool primeraVezAbierto = true;
     private bool calibracionEnProceso = false;
 
+    [Header("Sliders de Distancia")]
+    public Slider sliderDistanciaMenu;
+    public Slider sliderDistanciaPantalla;
+
     void Start()
     {
         audioSourceMenu = gameObject.AddComponent<AudioSource>();
@@ -115,9 +119,15 @@ public class ControladorMenu : MonoBehaviour
                 togglePantallaCurva.isOn = esCurva;
             }
 
-            // El código correcto
             if (pantallaPlana != null) pantallaPlana.SetActive(!esCurva);
             if (pantallaCurva != null) pantallaCurva.SetActive(esCurva);
+
+            sliderDistanciaMenu.value = config.distanciaMenu;
+            distanciaMenu = config.distanciaMenu;
+
+            float distInicial = config.pantallaCurva ? config.distanciaCurva : config.distanciaPlana;
+            sliderDistanciaPantalla.value = distInicial;
+            distanciaPantallaArkanoid = distInicial;
         }
 
         ActualizarLaseres(true);
@@ -294,9 +304,9 @@ public class ControladorMenu : MonoBehaviour
             {
                 laserIzquierdo.enabled = false;
             }
-            if (laserDerecho != null) 
-            { 
-                laserDerecho.enabled = false; 
+            if (laserDerecho != null)
+            {
+                laserDerecho.enabled = false;
             }
             return;
         }
@@ -324,7 +334,7 @@ public class ControladorMenu : MonoBehaviour
         }
         else if (modo == MonitorClinico.ModoControl.Derecho)
         {
-            if (laserIzquierdo != null) 
+            if (laserIzquierdo != null)
             {
                 laserIzquierdo.enabled = false;
             }
@@ -399,9 +409,9 @@ public class ControladorMenu : MonoBehaviour
         AbrirPanel(panelNiveles);
     }
 
-    public void BotonUI_IrAAjustes() 
-    { 
-        AbrirPanel(panelAjustes); 
+    public void BotonUI_IrAAjustes()
+    {
+        AbrirPanel(panelAjustes);
     }
 
     public void BotonUI_VolverAAjustesAnterior()
@@ -562,7 +572,7 @@ public class ControladorMenu : MonoBehaviour
     private System.Collections.IEnumerator FaseContador(string instruccion)
     {
         textoInstrucciones.text = instruccion;
-        for (int i = 5; i > 0; i--) 
+        for (int i = 5; i > 0; i--)
         {
             textoCuentaAtras.text = i.ToString();
             ReproducirSonidoClic();
@@ -598,11 +608,61 @@ public class ControladorMenu : MonoBehaviour
         if (GestorDatosUsuario.Instancia != null)
         {
             GestorDatosUsuario.Instancia.configActual.pantallaCurva = activarCurva;
+
+            // Sincronizamos el Slider con la distancia guardada para ese tipo de pantalla
+            float distanciaGuardada = activarCurva ?
+                GestorDatosUsuario.Instancia.configActual.distanciaCurva :
+                GestorDatosUsuario.Instancia.configActual.distanciaPlana;
+
+            sliderDistanciaPantalla.value = distanciaGuardada;
+
             GestorDatosUsuario.Instancia.GuardarConfiguracion();
         }
 
         // Aplicamos a la pantalla
         if (pantallaPlana != null) pantallaPlana.SetActive(!activarCurva);
         if (pantallaCurva != null) pantallaCurva.SetActive(activarCurva);
+
+        CentrarVistaUsuario();
+    }
+
+    public void CambiarDistanciaMenu(float nuevaDist)
+    {
+        float distPantallaActual = sliderDistanciaPantalla.value;
+        nuevaDist = Mathf.Min(nuevaDist, distPantallaActual - 0.3f); //Para que siempre esté más cerca el menú que la pantalla de juego
+        sliderDistanciaMenu.value = nuevaDist; // Ajustamos el slider si se pasa
+
+        distanciaMenu = nuevaDist;
+        if (GestorDatosUsuario.Instancia != null)
+        {
+            GestorDatosUsuario.Instancia.configActual.distanciaMenu = nuevaDist;
+            GestorDatosUsuario.Instancia.GuardarConfiguracion();
+        }
+        ColocarMenuDelanteDeLaMirada();
+    }
+
+    public void CambiarDistanciaPantalla(float nuevaDist)
+    {
+        distanciaPantallaArkanoid = nuevaDist;
+        bool esCurva = togglePantallaCurva.isOn;
+
+        if (GestorDatosUsuario.Instancia != null)
+        {
+            if (esCurva) GestorDatosUsuario.Instancia.configActual.distanciaCurva = nuevaDist;
+            else GestorDatosUsuario.Instancia.configActual.distanciaPlana = nuevaDist;
+
+            GestorDatosUsuario.Instancia.GuardarConfiguracion();
+        }
+
+        // Si la pantalla es curva, escalamos su tamaño para que siga envolviendo al jugador
+        // Un radio mayor requiere una escala mayor para mantener los 120º
+        if (esCurva && pantallaCurva != null)
+        {
+            // La escala base 1 es para distancia 3. Calculamos la proporción.
+            float factorEscala = nuevaDist / 3.0f;
+            pantallaCurva.transform.localScale = new Vector3(factorEscala, factorEscala, factorEscala);
+        }
+
+        CentrarVistaUsuario();
     }
 }

@@ -21,6 +21,10 @@ public class DatosConfiguracion
     public float centroX_R = 0f;
     public float alcanceIzqX_R = -0.2f;
     public float alcanceDerX_R = 0.2f;
+
+    public float distanciaMenu = 1.8f;
+    public float distanciaPlana = 3.7f;
+    public float distanciaCurva = 2.0f;
 }
 
 public class GestorDatosUsuario : MonoBehaviour

@@ -196,7 +196,8 @@ public class GestorArkanoid : MonoBehaviour
 
     public void BloqueDestruido()
     {
-        bloquesRestantes--;
+        GameObject[] bloques = GameObject.FindGameObjectsWithTag("Bloque");
+        bloquesRestantes = bloques.Length;
         if (bloquesRestantes <= 0)
         {
             LimpiarPelotas();
