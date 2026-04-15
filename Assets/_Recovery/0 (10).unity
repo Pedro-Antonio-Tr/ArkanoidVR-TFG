@@ -5434,7 +5434,7 @@ Transform:
   m_GameObject: {fileID: 251155224}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: -0.00000004371139, z: 0, w: -1}
-  m_LocalPosition: {x: 0, y: 1.5, z: 3.7}
+  m_LocalPosition: {x: 0, y: 0, z: 3.7}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -17361,9 +17361,6 @@ MonoBehaviour:
   indiceFatiga: 0
   golpesIzquierda: 0
   golpesDerecha: 0
-  headAnchor: {fileID: 507113514}
-  frecuenciaRegistro: 0.1
-  umbralMovimientoBrusco: 3
 --- !u!4 &944461517
 Transform:
   m_ObjectHideFlags: 0
@@ -24649,7 +24646,6 @@ MonoBehaviour:
   - {fileID: 2599432327706980216, guid: a4d7ca7f74f939547ae86859de34dea3, type: 3}
   - {fileID: 1954170586230764795, guid: 7af6f1e86fd54174d898faf416504734, type: 3}
   - {fileID: 5508533795155088661, guid: 2d2291a57dc674e4ea2fe9a98d0c2a10, type: 3}
-  - {fileID: 3649032260837723795, guid: a6838f4a427982241ac1146a74e4eb58, type: 3}
   nivelElegido: 1
   textoMensajes: {fileID: 426286023}
   textoEstadisticas: {fileID: 669598183}
@@ -31183,7 +31179,7 @@ Transform:
   m_GameObject: {fileID: 1865414026}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 1.5, z: 0}
   m_LocalScale: {x: 6, y: 3.3, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

@@ -33,9 +33,22 @@ public class GestorDatosUsuario : MonoBehaviour
 
     [Header("Usuario Actual")]
     public string idUsuario = "Invitado";
+    private string subRutaSesion = ""; // Para el timestamp si es invitado
     public DatosConfiguracion configActual = new DatosConfiguracion();
 
-    public string RutaUsuario => Path.Combine(Application.persistentDataPath, idUsuario);
+    public string RutaUsuario
+    {
+        get
+        {
+            string baseRuta = Path.Combine(Application.persistentDataPath, idUsuario);
+            // Si es invitado, añadimos la subcarpeta de la sesión
+            if (idUsuario == "Invitado" && !string.IsNullOrEmpty(subRutaSesion))
+            {
+                return Path.Combine(baseRuta, subRutaSesion);
+            }
+            return baseRuta;
+        }
+    }
     public string RutaTracking => Path.Combine(RutaUsuario, "Tracking");
 
     void Awake()
@@ -43,13 +56,58 @@ public class GestorDatosUsuario : MonoBehaviour
         if (Instancia == null)
         {
             Instancia = this;
-            DontDestroyOnLoad(gameObject); // Sobrevive entre escenas
+            DontDestroyOnLoad(gameObject);
+
+            CapturarIDDesdeIntent();
+
+            if (idUsuario == "Invitado")
+            {
+                subRutaSesion = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
+            }
+
             InicializarCarpetas();
             CargarConfiguracion();
         }
         else
         {
             Destroy(gameObject);
+        }
+    }
+    private void CapturarIDDesdeIntent()
+    {
+        // Solo intentamos esto en Android (Gafas), en el Editor fallaría
+        if (Application.platform != RuntimePlatform.Android) return;
+
+        try
+        {
+            using (AndroidJavaClass unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
+            {
+                AndroidJavaObject currentActivity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
+                if (currentActivity != null)
+                {
+                    AndroidJavaObject intent = currentActivity.Call<AndroidJavaObject>("getIntent");
+                    if (intent != null)
+                    {
+                        // Buscamos el extra "user"
+                        using (AndroidJavaObject extras = intent.Call<AndroidJavaObject>("getExtras"))
+                        {
+                            if (extras != null)
+                            {
+                                string idCapturado = extras.Call<string>("getString", "user");
+                                if (!string.IsNullOrEmpty(idCapturado))
+                                {
+                                    idUsuario = idCapturado;
+                                    Debug.Log("ID de Usuario capturado con éxito: " + idUsuario);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.Log("No se detectó parámetro de usuario en el Intent, usando Invitado. " + e.Message);
         }
     }
 
@@ -74,6 +132,14 @@ public class GestorDatosUsuario : MonoBehaviour
     public void CargarConfiguracion()
     {
         string ruta = Path.Combine(RutaUsuario, "config.json");
+
+        // Si no existe en la sesión actual (invitado), intentamos buscar una global en la raíz de Invitado
+        // para que no pierdan el volumen/ajustes cada vez que abren la app si son invitados.
+        if (!File.Exists(ruta) && idUsuario == "Invitado")
+        {
+            ruta = Path.Combine(Application.persistentDataPath, "Invitado", "config.json");
+        }
+
         if (File.Exists(ruta))
         {
             string json = File.ReadAllText(ruta);
@@ -86,15 +152,13 @@ public class GestorDatosUsuario : MonoBehaviour
         string ruta = Path.Combine(RutaUsuario, "historial_partidas.csv");
         bool existe = File.Exists(ruta);
 
-        using (StreamWriter sw = new StreamWriter(ruta, true)) // 'true' es para añadir abajo, no borrar
+        using (StreamWriter sw = new StreamWriter(ruta, true))
         {
             if (!existe)
             {
-                // Cabecera la primera vez que se crea el archivo del paciente
-                sw.WriteLine("FechaHora,Nivel,Dificultad,Duracion(s),Resultado,BloquesRestantes,IndiceFatiga,ReaccionMedia(s),Golpes_IZQ,Golpes_DER");
+                sw.WriteLine("FechaHora;Nivel;Dificultad;Duracion(s);Resultado;BloquesRestantes;IndiceFatiga;ReaccionMedia(s);Golpes_IZQ;Golpes_DER");
             }
-            sw.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss},{nivel},{dificultad},{duracion:F1},{resultado},{bloques},{fatiga:F2},{reaccion:F2},{golpesI},{golpesD}");
+            sw.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss};{nivel};{dificultad};{duracion:F1};{resultado};{bloques};{fatiga:F2};{reaccion:F2};{golpesI};{golpesD}");
         }
-        Debug.Log("Partida guardada en Historial de: " + idUsuario);
     }
 }

@@ -125,6 +125,10 @@ public class GestorArkanoid : MonoBehaviour
         LimpiarPelotas();
         textoMensajes.text = "ABRE EL MENÚ PARA EMPEZAR";
         textoEstadisticas.text = "";
+        if (MonitorClinico.Instancia != null)
+        {
+            MonitorClinico.Instancia.DetenerTelemetria();
+        }
         if (textoDebug != null)
         {
             textoDebug.text = "";
@@ -170,6 +174,11 @@ public class GestorArkanoid : MonoBehaviour
         if (sonidoGo != null)
         {
             audioSourceUI.PlayOneShot(sonidoGo);
+        }
+
+        if (MonitorClinico.Instancia != null)
+        {
+            MonitorClinico.Instancia.IniciarTelemetria($"Nivel_{nivelElegido + 1}");
         }
 
         Instantiate(prefabPelota, puntoAparicion.position, Quaternion.identity, transform);
@@ -239,6 +248,7 @@ public class GestorArkanoid : MonoBehaviour
             float reaccion = MonitorClinico.Instancia.ObtenerMediaReaccion();
             int golpesI = MonitorClinico.Instancia.golpesIzquierda;
             int golpesD = MonitorClinico.Instancia.golpesDerecha;
+            MonitorClinico.Instancia.DetenerTelemetria();
 
             GestorDatosUsuario.Instancia.GuardarPartidaCSV(
                 $"Nivel {nivelElegido + 1}",

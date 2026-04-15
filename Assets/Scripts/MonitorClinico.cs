@@ -30,6 +30,15 @@ public class MonitorClinico : MonoBehaviour
     public int golpesIzquierda = 0;
     public int golpesDerecha = 0;
 
+    [Header("Telemetría (Tracking Raw)")]
+    public Transform headAnchor;
+    public float frecuenciaRegistro = 0.1f; // 0.1s = 10 registros por segundo
+    public float umbralMovimientoBrusco = 3.0f; // Se considera brusco si la aceleración supera 3 m/s²
+
+    private StreamWriter escritorTelemetria;
+    private bool grabandoTelemetria = false;
+    private float tiempoInicioSesionTelemetria;
+
     // Tiempos de reacción
     private List<float> tiemposDeReaccion = new List<float>();
     private bool midiendoReaccion = false;
@@ -181,5 +190,84 @@ public class MonitorClinico : MonoBehaviour
     {
         golpesIzquierda = 0;
         golpesDerecha = 0;
+    }
+
+    public void IniciarTelemetria(string nombreNivel)
+    {
+        // Creamos un archivo único para esta partida
+        string fechaHora = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+        string nombreArchivo = $"Telemetria_{GestorDatosUsuario.Instancia.idUsuario}_{nombreNivel}_{fechaHora}.csv";
+        string ruta = Path.Combine(GestorDatosUsuario.Instancia.RutaTracking, nombreArchivo);
+
+        try
+        {
+            escritorTelemetria = new StreamWriter(ruta, false);
+
+            escritorTelemetria.WriteLine("Tiempo(s);Head_RotX;Head_RotY;Head_RotZ;L_PosX;L_PosY;L_PosZ;L_Vel(m/s);R_PosX;R_PosY;R_PosZ;R_Vel(m/s);Evento");
+
+            tiempoInicioSesionTelemetria = Time.time;
+            grabandoTelemetria = true;
+            StartCoroutine(RutinaRegistroTelemetria());
+
+            Debug.Log("Telemetría iniciada en: " + ruta);
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("Error al crear archivo de telemetría: " + e.Message);
+        }
+    }
+
+    public void DetenerTelemetria()
+    {
+        grabandoTelemetria = false;
+        if (escritorTelemetria != null)
+        {
+            escritorTelemetria.Close();
+            escritorTelemetria = null;
+            Debug.Log("Archivo de telemetría cerrado y guardado.");
+        }
+    }
+
+    private System.Collections.IEnumerator RutinaRegistroTelemetria()
+    {
+        while (grabandoTelemetria)
+        {
+            // Solo grabamos si el juego no está en pausa
+            if (Time.timeScale > 0)
+            {
+                float t = Time.time - tiempoInicioSesionTelemetria;
+
+                // Rotación de la cabeza
+                Vector3 hR = headAnchor != null ? headAnchor.eulerAngles : Vector3.zero;
+
+                // Posición de las manos
+                Vector3 lP = mandoIzquierdo != null ? mandoIzquierdo.localPosition : Vector3.zero;
+                Vector3 rP = mandoDerecho != null ? mandoDerecho.localPosition : Vector3.zero;
+
+                // Velocidades de las manos (Magnitud total en metros/segundo)
+                float velL = OVRInput.GetLocalControllerVelocity(OVRInput.Controller.LTouch).magnitude;
+                float velR = OVRInput.GetLocalControllerVelocity(OVRInput.Controller.RTouch).magnitude;
+
+                // Detección de Eventos (Movimientos bruscos)
+                string evento = "NORMAL";
+                if (velL > umbralMovimientoBrusco) evento = "MOVIMIENTO_BRUSCO_IZQ";
+                if (velR > umbralMovimientoBrusco) evento = "MOVIMIENTO_BRUSCO_DER";
+
+                // Formateamos la línea con dos decimales (F2) y punto y coma
+                string linea = $"{t:F2};{hR.x:F2};{hR.y:F2};{hR.z:F2};{lP.x:F2};{lP.y:F2};{lP.z:F2};{velL:F2};{rP.x:F2};{rP.y:F2};{rP.z:F2};{velR:F2};{evento}";
+
+                if (escritorTelemetria != null)
+                {
+                    escritorTelemetria.WriteLine(linea);
+                }
+            }
+
+            yield return new WaitForSeconds(frecuenciaRegistro);
+        }
+    }
+
+    void OnDestroy()
+    {
+        DetenerTelemetria();
     }
 }
