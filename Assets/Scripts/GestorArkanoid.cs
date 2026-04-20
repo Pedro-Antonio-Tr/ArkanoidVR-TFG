@@ -70,9 +70,20 @@ public class GestorArkanoid : MonoBehaviour
         {
             tiempoPartida += Time.deltaTime;
 
+            int vidaTotal = 0;
             GameObject[] bloques = GameObject.FindGameObjectsWithTag("Bloque");
             bloquesRestantes = bloques.Length;
-            if (bloquesRestantes <= 0)
+
+            foreach (GameObject b in bloques)
+            {
+                BloqueArkanoid scriptBloque = b.GetComponent<BloqueArkanoid>();
+                if (scriptBloque != null)
+                {
+                    vidaTotal += scriptBloque.puntosDeVida;
+                }
+            }
+
+            if (bloquesRestantes <= 0 || vidaTotal <= 0)
             {
                 LimpiarPelotas();
                 TerminarPartida("¡NIVEL COMPLETADO!");
