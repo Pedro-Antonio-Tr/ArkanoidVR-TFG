@@ -69,6 +69,14 @@ public class GestorArkanoid : MonoBehaviour
         if (cronometroActivo)
         {
             tiempoPartida += Time.deltaTime;
+
+            GameObject[] bloques = GameObject.FindGameObjectsWithTag("Bloque");
+            bloquesRestantes = bloques.Length;
+            if (bloquesRestantes <= 0)
+            {
+                LimpiarPelotas();
+                TerminarPartida("¡NIVEL COMPLETADO!");
+            }
         }
 
         if (explosivoActivo)
@@ -221,6 +229,7 @@ public class GestorArkanoid : MonoBehaviour
         cronometroActivo = false;
         juegoEmpezado = false;
         textoMensajes.text = mensaje;
+        explosivoActivo = false;
 
         // Formatear tiempo en Minutos:Segundos
         int minutos = Mathf.FloorToInt(tiempoPartida / 60F);

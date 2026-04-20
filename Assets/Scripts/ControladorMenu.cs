@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -68,6 +67,8 @@ public class ControladorMenu : MonoBehaviour
     [Header("Sliders de Distancia")]
     public Slider sliderDistanciaMenu;
     public Slider sliderDistanciaPantalla;
+
+    private bool partidaTerminada = false;
 
     void Start()
     {
@@ -147,8 +148,10 @@ public class ControladorMenu : MonoBehaviour
     {
         if (OVRInput.GetDown(OVRInput.Button.One) ||
             OVRInput.GetDown(OVRInput.Button.Three) ||
-            OVRInput.GetDown(OVRInput.Button.Start))
+            OVRInput.GetDown(OVRInput.Button.Start) || 
+            partidaTerminada)
         {
+            partidaTerminada = false;
             AlternarMenuGeneral();
         }
     }
@@ -602,7 +605,7 @@ public class ControladorMenu : MonoBehaviour
 
     public void MostrarResultadosFinales(string titulo)
     {
-        AlternarMenuGeneral();
+        partidaTerminada = true;
         panelMenu.SetActive(true);
         AbrirPanel(panelPausa);
 
