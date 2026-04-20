@@ -1,6 +1,8 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using UnityEngine;
+using static System.Net.Mime.MediaTypeNames;
 
 [Serializable]
 public class DatosConfiguracion
@@ -131,19 +133,28 @@ public class GestorDatosUsuario : MonoBehaviour
 
     public void CargarConfiguracion()
     {
-        string ruta = Path.Combine(RutaUsuario, "config.json");
+        string rutaUsuario = Path.Combine(RutaUsuario, "config.json");
+        string rutaInvitadoGlobal = Path.Combine(Application.persistentDataPath, "Invitado", "config.json");
 
-        // Si no existe en la sesión actual (invitado), intentamos buscar una global en la raíz de Invitado
-        // para que no pierdan el volumen/ajustes cada vez que abren la app si son invitados.
-        if (!File.Exists(ruta) && idUsuario == "Invitado")
+        if (File.Exists(rutaUsuario))
         {
-            ruta = Path.Combine(Application.persistentDataPath, "Invitado", "config.json");
-        }
-
-        if (File.Exists(ruta))
-        {
-            string json = File.ReadAllText(ruta);
+            string json = File.ReadAllText(rutaUsuario);
             configActual = JsonUtility.FromJson<DatosConfiguracion>(json);
+            Debug.Log("Configuración de usuario cargada.");
+        }
+        else
+        {
+            TextAsset defaultJson = Resources.Load<TextAsset>("default_config");
+            if (defaultJson != null)
+            {
+                configActual = JsonUtility.FromJson<DatosConfiguracion>(defaultJson.text);
+                Debug.Log("Configuración default cargada.");
+            }
+            else
+            {
+                configActual = new DatosConfiguracion();
+                Debug.LogWarning("No se encontró default_config en Resources. Usando valores internos.");
+            }
         }
     }
 

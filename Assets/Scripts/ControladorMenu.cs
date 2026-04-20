@@ -1,5 +1,6 @@
-using UnityEngine;
+using System.Diagnostics;
 using TMPro;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class ControladorMenu : MonoBehaviour
@@ -75,59 +76,66 @@ public class ControladorMenu : MonoBehaviour
         audioSourceMenu.ignoreListenerPause = true;
         panelMenu.SetActive(true);
         AbrirPanel(panelBienvenida);
-        ColocarMenuDelanteDeLaMirada();
-
-        if (sliderVolumen != null)
-        {
-            sliderVolumen.value = AudioListener.volume;
-        }
 
         if (GestorDatosUsuario.Instancia != null)
         {
-            DatosConfiguracion config = GestorDatosUsuario.Instancia.configActual;
+            StartCoroutine(RutinaAplicarConfiguracionInicial());
+        }
+        else
+        {
+            ColocarMenuDelanteDeLaMirada();
+            ActualizarLaseres(true);
+            ActualizarBotonesModo();
+            ActualizarBotonesDificultad();
+        }
+    }
 
-            // Volumen
-            if (sliderVolumen != null)
-            {
-                sliderVolumen.value = config.volumen;
-            }
-            AudioListener.volume = config.volumen;
+    private System.Collections.IEnumerator RutinaAplicarConfiguracionInicial()
+    {
+        yield return null;
 
-            // Dificultad
-            if (MonitorClinico.Instancia != null)
-            {
-                MonitorClinico.Instancia.dificultadActual = (MonitorClinico.NivelDificultad)config.dificultad;
-            }
+        DatosConfiguracion config = GestorDatosUsuario.Instancia.configActual;
 
-            // Modo de Mando
-            if (MonitorClinico.Instancia != null)
-            {
-                MonitorClinico.Instancia.modoActual = (MonitorClinico.ModoControl)config.modoMando;
-            }
+        if (sliderVolumen != null)
+        {
+            sliderVolumen.value = config.volumen;
+        }
+        AudioListener.volume = config.volumen;
 
-            // Inclinación de Pantalla (Si ya tenía una guardada)
-            if (pantallaArkanoid != null && config.inclinacionPantallaX != 0f)
-            {
-                // Solo rotamos el eje X (cabeceo) y dejamos los demás quietos
-                Vector3 rotacionActual = pantallaArkanoid.eulerAngles;
-                pantallaArkanoid.eulerAngles = new Vector3(config.inclinacionPantallaX, rotacionActual.y, rotacionActual.z);
-            }
+        if (MonitorClinico.Instancia != null)
+        {
+            MonitorClinico.Instancia.dificultadActual = (MonitorClinico.NivelDificultad)config.dificultad;
+        }
 
-            bool esCurva = config.pantallaCurva;
-            if (togglePantallaCurva != null)
-            {
-                togglePantallaCurva.isOn = esCurva;
-            }
+        if (MonitorClinico.Instancia != null)
+        {
+            MonitorClinico.Instancia.modoActual = (MonitorClinico.ModoControl)config.modoMando;
+        }
 
-            if (pantallaPlana != null) pantallaPlana.SetActive(!esCurva);
-            if (pantallaCurva != null) pantallaCurva.SetActive(esCurva);
+        bool esCurva = config.pantallaCurva;
+        if (togglePantallaCurva != null) togglePantallaCurva.isOn = esCurva;
+        if (pantallaPlana != null) pantallaPlana.SetActive(!esCurva);
+        if (pantallaCurva != null) pantallaCurva.SetActive(esCurva);
 
-            sliderDistanciaMenu.value = config.distanciaMenu;
-            distanciaMenu = config.distanciaMenu;
+        distanciaMenu = config.distanciaMenu;
+        if (sliderDistanciaMenu != null) sliderDistanciaMenu.value = config.distanciaMenu;
 
-            float distInicial = config.pantallaCurva ? config.distanciaCurva : config.distanciaPlana;
-            sliderDistanciaPantalla.value = distInicial;
-            distanciaPantallaArkanoid = distInicial;
+        float distInicial = esCurva ? config.distanciaCurva : config.distanciaPlana;
+        distanciaPantallaArkanoid = distInicial;
+        if (sliderDistanciaPantalla != null) sliderDistanciaPantalla.value = distInicial;
+
+        if (esCurva && pantallaCurva != null)
+        {
+            float factorEscala = distInicial / 3.0f;
+            pantallaCurva.transform.localScale = new Vector3(factorEscala, factorEscala, factorEscala);
+        }
+
+        CentrarVistaUsuario();
+
+        if (pantallaArkanoid != null && config.inclinacionPantallaX != 0f)
+        {
+            Vector3 rotacionActual = pantallaArkanoid.eulerAngles;
+            pantallaArkanoid.eulerAngles = new Vector3(config.inclinacionPantallaX, rotacionActual.y, rotacionActual.z);
         }
 
         ActualizarLaseres(true);
@@ -203,7 +211,17 @@ public class ControladorMenu : MonoBehaviour
         if (headAnchor == null || pantallaArkanoid == null) return;
 
         Vector3 headPos = headAnchor.position;
+        if (headPos.y < 0.5f)
+        {
+            headPos.y = 1.5f;
+            Debug.LogWarning("Tracking no listo al centrar. Usando altura de seguridad 1.5m");
+        }
+
         Vector3 lookDirection = headAnchor.forward;
+        if (Mathf.Abs(lookDirection.y) > 0.8f)
+        {
+            lookDirection = Vector3.ProjectOnPlane(lookDirection, Vector3.up);
+        }
 
         Vector3 posPantalla = headPos + (lookDirection.normalized * distanciaPantallaArkanoid);
         pantallaArkanoid.position = posPantalla;
