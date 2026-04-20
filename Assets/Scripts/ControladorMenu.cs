@@ -216,7 +216,7 @@ public class ControladorMenu : MonoBehaviour
         Vector3 headPos = headAnchor.position;
         if (headPos.y < 0.5f)
         {
-            headPos.y = 1.5f;
+            headPos.y = 1.8f;
             Debug.LogWarning("Tracking no listo al centrar. Usando altura de seguridad 1.5m");
         }
 

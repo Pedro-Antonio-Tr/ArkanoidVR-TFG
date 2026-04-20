@@ -19,6 +19,9 @@ public class GestorArkanoid : MonoBehaviour
     [Header("Conexión Clínica")]
     public ControladorPalaVR controladorPala;
 
+    [Header("Menú")]
+    public ControladorMenu controladorMenu;
+
     [Header("Aparición de Pelota")]
     public GameObject prefabPelota;
     public Transform puntoAparicion;
@@ -282,7 +285,7 @@ public class GestorArkanoid : MonoBehaviour
                 golpesD
             );
         }
-        ControladorMenu.Instancia.MostrarResultadosFinales(mensaje);
+        controladorMenu.MostrarResultadosFinales(mensaje);
     }
 
     void LimpiarPelotas()

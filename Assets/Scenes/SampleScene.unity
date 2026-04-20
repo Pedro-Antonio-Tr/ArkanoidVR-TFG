@@ -5434,7 +5434,7 @@ Transform:
   m_GameObject: {fileID: 251155224}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: -0.00000004371139, z: 0, w: -1}
-  m_LocalPosition: {x: 0, y: 0, z: 3.7}
+  m_LocalPosition: {x: 0, y: 1.5, z: 3.7}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -24655,6 +24655,7 @@ MonoBehaviour:
   textoEstadisticas: {fileID: 669598183}
   textoDebug: {fileID: 264850165}
   controladorPala: {fileID: 859417126}
+  controladorMenu: {fileID: 1157330733}
   prefabPelota: {fileID: 6306325649414794681, guid: b8ae3bcaf8029a34083087f6d6703705, type: 3}
   puntoAparicion: {fileID: 1929427825}
   pelotasEnJuego: 0

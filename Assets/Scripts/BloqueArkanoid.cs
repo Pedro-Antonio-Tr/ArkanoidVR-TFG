@@ -97,17 +97,18 @@ public class BloqueArkanoid : MonoBehaviour
                 float tirada = Random.Range(0f, 100f);
 
                 float multiProbabilidad = 1f;
-                if (MonitorClinico.Instancia != null)
-                {
-                    if (MonitorClinico.Instancia.dificultadActual == MonitorClinico.NivelDificultad.Facil)
-                    {
-                        multiProbabilidad = 1.5f;
-                    }
-                    else if (MonitorClinico.Instancia.dificultadActual == MonitorClinico.NivelDificultad.Dificil)
-                    {
-                        multiProbabilidad = 0.5f;
-                    }
-                }
+                //if (MonitorClinico.Instancia != null)
+                //{
+                //if (MonitorClinico.Instancia.dificultadActual == MonitorClinico.NivelDificultad.Facil)
+                //{
+                //    multiProbabilidad = 1.5f;
+                //}
+                //else if (MonitorClinico.Instancia.dificultadActual == MonitorClinico.NivelDificultad.Dificil)
+                //{
+                //    multiProbabilidad = 0.5f;
+                //}
+                //}
+                // Desactivo de momento el ajuste de dificultad porque está muy desequilibrado.
                 float topeProbabilidad = probabilidadMejora * multiProbabilidad;
 
                 if (GestorArkanoid.Instancia != null)
