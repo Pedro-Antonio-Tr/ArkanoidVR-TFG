@@ -606,8 +606,6 @@ public class ControladorMenu : MonoBehaviour
     public void MostrarResultadosFinales(string titulo)
     {
         partidaTerminada = true;
-        panelMenu.SetActive(true);
-        AbrirPanel(panelPausa);
 
         if (textoStatsClinicas != null)
         {
@@ -619,7 +617,6 @@ public class ControladorMenu : MonoBehaviour
                                      $"{nivel} | TIEMPO: {tiempo}\n" +
                                      $"BLOQUES RESTANTES: {bloques}";
         }
-        ActualizarLaseres(true);
     }
 
     public void CambiarCurvaturaPantalla()

@@ -340,6 +340,11 @@ public class GestorArkanoid : MonoBehaviour
     {
         GameObject[] pelotasActuales = GameObject.FindGameObjectsWithTag("Pelota");
 
+        if (pelotasActuales.Length > 40)
+        {
+            return; // Evitamos crear demasiadas pelotas que puedan colapsar el juego
+        }
+
         foreach (GameObject pelota in pelotasActuales)
         {
             GameObject nuevaPelota = Instantiate(prefabPelota, pelota.transform.position, Quaternion.identity, transform);
