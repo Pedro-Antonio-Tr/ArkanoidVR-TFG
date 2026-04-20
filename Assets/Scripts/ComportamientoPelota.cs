@@ -4,6 +4,7 @@ public class ComportamientoPelota : MonoBehaviour
 {
     public float velocidad = 15f;
     public float limiteInferiorY = -9f; // Altura a la que la pelota "muere" (por debajo de la pala)
+    private float velocidadActual;
 
     private Rigidbody rb;
     private GestorArkanoid gestor;
@@ -31,22 +32,26 @@ public class ComportamientoPelota : MonoBehaviour
 
         if (gestor != null) gestor.RegistrarPelota();
 
-        // Lanzar la pelota hacia arriba y en una dirección aleatoria inicial
         Vector3 direccionInicial = new Vector3(Random.Range(-1f, 1f), 1f, 0f).normalized;
-        float velocidadFinal = velocidad;
+        velocidadActual = velocidad;
 
         if (MonitorClinico.Instancia != null)
         {
             if (MonitorClinico.Instancia.dificultadActual == MonitorClinico.NivelDificultad.Facil)
             {
-                velocidadFinal *= 0.5f; // 50% más lenta
+                velocidadActual = velocidad * 0.4f; // 40% de la velocidad base
+            }
+            else if (MonitorClinico.Instancia.dificultadActual == MonitorClinico.NivelDificultad.Normal)
+            {
+                velocidadActual = velocidad * 0.7f; // 70% de la velocidad base
             }
             else if (MonitorClinico.Instancia.dificultadActual == MonitorClinico.NivelDificultad.Dificil)
             {
-                velocidadFinal *= 1.5f; // 50% más rápida
+                velocidadActual = velocidad * 1.0f;
             }
         }
-        rb.linearVelocity = direccionInicial * velocidadFinal;
+
+        rb.linearVelocity = direccionInicial * velocidadActual;
         audioSourceLocal = gameObject.AddComponent<AudioSource>();
         audioSourceLocal.spatialBlend = 0;
     }
@@ -57,22 +62,19 @@ public class ComportamientoPelota : MonoBehaviour
         // Mantener la pelota estrictamente en z=0 por seguridad
         transform.localPosition = new UnityEngine.Vector3(transform.localPosition.x, transform.localPosition.y, 0f);
 
-        // Forzamos la velocidad constante en cada frame para evitar que se ralentice o acelere demasiado por bugs.
-        rb.linearVelocity = rb.linearVelocity.normalized * velocidad;
+        // Fix a la velocidad que hacía que no se adaptase a la dificultad.
+        rb.linearVelocity = rb.linearVelocity.normalized * velocidadActual;
 
-        // SISTEMA ANTI-SOFTLOCK
         UnityEngine.Vector3 velActual = rb.linearVelocity;
 
         // Comprobamos si la velocidad vertical (Y) es peligrosamente baja (ej. menor a 2)
         if (Mathf.Abs(velActual.y) < 2f)
         {
-            // Le damos un "empujoncito" artificial de 2 unidades en la dirección que ya llevaba
-            // (Si iba un poco hacia arriba, la subimos más; si iba hacia abajo, la bajamos más)
             velActual.y = (velActual.y >= 0) ? 2f : -2f;
             rb.linearVelocity = velActual;
         }
         // Igual pero para la velocidad horizontal (X),
-        if (Mathf.Abs(velActual.x) < 1.5f) // Con 1.5f es suficiente para que el ángulo varíe y salga de la trampa
+        if (Mathf.Abs(velActual.x) < 1.5f) 
         {
             velActual.x = (velActual.x >= 0) ? 1.5f : -1.5f;
             rb.linearVelocity = velActual;
