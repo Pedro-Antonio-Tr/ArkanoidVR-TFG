@@ -1,6 +1,7 @@
 using UnityEngine;
 using TMPro;
 using System.Collections;
+using System.Threading;
 
 public class GestorArkanoid : MonoBehaviour
 {
@@ -25,6 +26,14 @@ public class GestorArkanoid : MonoBehaviour
     [Header("Aparición de Pelota")]
     public GameObject prefabPelota;
     public Transform puntoAparicion;
+
+    [Header("Péndulo de Lanzamiento")]
+    public Transform pivotFlecha;
+    public float anguloMaximo = 45f; // Rango de balanceo (-45 a 45 grados)
+    public float velocidadPendulo = 3f; // Qué tan rápido oscila
+
+    private bool animandoPendulo = false;
+    private float anguloPenduloActual = 0f;
 
     [Header("Estado de la Partida")]
     public int pelotasEnJuego = 0;
@@ -69,6 +78,13 @@ public class GestorArkanoid : MonoBehaviour
 
     void Update()
     {
+        if (animandoPendulo && pivotFlecha != null)
+        {
+            anguloPenduloActual = Mathf.Sin(Time.time * velocidadPendulo) * anguloMaximo;
+
+            pivotFlecha.localRotation = Quaternion.Euler(0f, 0f, -anguloPenduloActual);
+        }
+
         if (cronometroActivo)
         {
             tiempoPartida += Time.deltaTime;
@@ -124,6 +140,7 @@ public class GestorArkanoid : MonoBehaviour
 
     public void EmpezarPartidaDesdeMenu()
     {
+        Time.timeScale = 1f;
         LimpiarPelotas();
         textoMensajes.text = "";
         textoEstadisticas.text = "";
@@ -174,6 +191,12 @@ public class GestorArkanoid : MonoBehaviour
         yield return new WaitForSeconds(0.1f);
         bloquesRestantes = GameObject.FindGameObjectsWithTag("Bloque").Length;
 
+        if (pivotFlecha != null)
+        {
+            pivotFlecha.gameObject.SetActive(true);
+        }
+        animandoPendulo = true;
+
         textoMensajes.text = "3";
         if (sonidoCuentaAtras != null)
         {
@@ -198,12 +221,26 @@ public class GestorArkanoid : MonoBehaviour
             audioSourceUI.PlayOneShot(sonidoGo);
         }
 
+        animandoPendulo = false;
+        if (pivotFlecha != null)
+        {
+            pivotFlecha.gameObject.SetActive(false);
+        }
+
         if (MonitorClinico.Instancia != null)
         {
             MonitorClinico.Instancia.IniciarTelemetria($"Nivel_{nivelElegido + 1}");
         }
 
-        Instantiate(prefabPelota, puntoAparicion.position, Quaternion.identity, transform);
+        Vector3 direccionLanzamiento = Quaternion.Euler(0f, 0f, -anguloPenduloActual) * Vector3.up;
+
+        GameObject nuevaPelota = Instantiate(prefabPelota, puntoAparicion.position, Quaternion.identity, transform);
+        ComportamientoPelota scriptPelota = nuevaPelota.GetComponent<ComportamientoPelota>();
+
+        if (scriptPelota != null)
+        {
+            scriptPelota.Lanzar(direccionLanzamiento);
+        }
 
         enCuentaAtras = false;
         juegoEmpezado = true;
@@ -222,7 +259,7 @@ public class GestorArkanoid : MonoBehaviour
     public void PelotaDestruida()
     {
         pelotasEnJuego--;
-        if (pelotasEnJuego <= 0 && bloquesRestantes > 0) TerminarPartida("¡FIN DEL JUEGO!");
+        if (pelotasEnJuego <= 0 && bloquesRestantes > 0) TerminarPartida("¡Has perdido!");
     }
 
     public void BloqueDestruido()
@@ -348,15 +385,13 @@ public class GestorArkanoid : MonoBehaviour
         foreach (GameObject pelota in pelotasActuales)
         {
             GameObject nuevaPelota = Instantiate(prefabPelota, pelota.transform.position, Quaternion.identity, transform);
+            ComportamientoPelota scriptNueva = nuevaPelota.GetComponent<ComportamientoPelota>();
 
             Rigidbody rbOriginal = pelota.GetComponent<Rigidbody>();
-            Rigidbody rbNueva = nuevaPelota.GetComponent<Rigidbody>();
-
-            if (rbOriginal != null && rbNueva != null)
+            if (rbOriginal != null && scriptNueva != null)
             {
-                // Invertimos su velocidad en el eje X para que salgan en "V"
-                Vector3 velOriginal = rbOriginal.linearVelocity;
-                rbNueva.linearVelocity = new Vector3(-velOriginal.x, velOriginal.y, 0f);
+                Vector3 velNueva = new Vector3(-rbOriginal.linearVelocity.x, rbOriginal.linearVelocity.y, 0f);
+                scriptNueva.Lanzar(velNueva);
             }
         }
     }

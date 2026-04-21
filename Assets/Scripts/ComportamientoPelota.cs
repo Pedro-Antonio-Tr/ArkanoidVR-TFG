@@ -8,6 +8,7 @@ public class ComportamientoPelota : MonoBehaviour
 
     private Rigidbody rb;
     private GestorArkanoid gestor;
+    private bool lanzada = false;
 
     [Header("Efectos de Sonido")]
     public AudioClip sonidoPared;
@@ -20,10 +21,10 @@ public class ComportamientoPelota : MonoBehaviour
     private MeshRenderer rendererPelota;
 
     [Header("Ajustes Explosión")]
-    public float radioExplosion = 5f;
+    public float radioExplosion = 4f;
     public GameObject prefabEfectoExplosion;
 
-    void Start()
+    void Awake()
     {
         rendererPelota = GetComponent<MeshRenderer>();
         matOriginal = rendererPelota.material;
@@ -32,26 +33,6 @@ public class ComportamientoPelota : MonoBehaviour
 
         if (gestor != null) gestor.RegistrarPelota();
 
-        Vector3 direccionInicial = new Vector3(Random.Range(-1f, 1f), 1f, 0f).normalized;
-        velocidadActual = velocidad;
-
-        if (MonitorClinico.Instancia != null)
-        {
-            if (MonitorClinico.Instancia.dificultadActual == MonitorClinico.NivelDificultad.Facil)
-            {
-                velocidadActual = velocidad * 0.4f; // 40% de la velocidad base
-            }
-            else if (MonitorClinico.Instancia.dificultadActual == MonitorClinico.NivelDificultad.Normal)
-            {
-                velocidadActual = velocidad * 0.7f; // 70% de la velocidad base
-            }
-            else if (MonitorClinico.Instancia.dificultadActual == MonitorClinico.NivelDificultad.Dificil)
-            {
-                velocidadActual = velocidad * 1.0f;
-            }
-        }
-
-        rb.linearVelocity = direccionInicial * velocidadActual;
         audioSourceLocal = gameObject.AddComponent<AudioSource>();
         audioSourceLocal.spatialBlend = 0;
     }
@@ -59,11 +40,16 @@ public class ComportamientoPelota : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // Mantener la pelota estrictamente en z=0 por seguridad
-        transform.localPosition = new UnityEngine.Vector3(transform.localPosition.x, transform.localPosition.y, 0f);
+        if(!lanzada)
+        {
+            return;
+        }
 
-        // Fix a la velocidad que hacía que no se adaptase a la dificultad.
-        rb.linearVelocity = rb.linearVelocity.normalized * velocidadActual;
+        transform.localPosition = new UnityEngine.Vector3(transform.localPosition.x, transform.localPosition.y, 0f);
+        if (rb.linearVelocity.magnitude > 0.1f)
+        {
+            rb.linearVelocity = rb.linearVelocity.normalized * velocidadActual;
+        }
 
         UnityEngine.Vector3 velActual = rb.linearVelocity;
 
@@ -170,5 +156,29 @@ public class ComportamientoPelota : MonoBehaviour
                 }
             }
         }
+    }
+
+    public void Lanzar(Vector3 direccion)
+    {
+        velocidadActual = velocidad;
+
+        if (MonitorClinico.Instancia != null)
+        {
+            if (MonitorClinico.Instancia.dificultadActual == MonitorClinico.NivelDificultad.Facil)
+            {
+                velocidadActual = velocidad * 0.5f;
+            }
+            else if (MonitorClinico.Instancia.dificultadActual == MonitorClinico.NivelDificultad.Normal)
+            {
+                velocidadActual = velocidad * 0.75f;
+            }
+            else if (MonitorClinico.Instancia.dificultadActual == MonitorClinico.NivelDificultad.Dificil)
+            {
+                velocidadActual = velocidad * 1.0f;
+            }
+        }
+
+        rb.linearVelocity = direccion.normalized * velocidadActual;
+        lanzada = true;
     }
 }

@@ -133,25 +133,46 @@ public class GestorDatosUsuario : MonoBehaviour
     {
         string rutaUsuario = Path.Combine(RutaUsuario, "config.json");
 
+        string rutaInvitado = Path.Combine(Application.persistentDataPath, "Invitado");
+        string rutaDefaultPublica = Path.Combine(rutaInvitado, "default_config.json");
+
         if (File.Exists(rutaUsuario))
         {
             string json = File.ReadAllText(rutaUsuario);
             configActual = JsonUtility.FromJson<DatosConfiguracion>(json);
             Debug.Log("Configuración de usuario cargada.");
+            return;
+        }
+
+        if (File.Exists(rutaDefaultPublica))
+        {
+            string json = File.ReadAllText(rutaDefaultPublica);
+            configActual = JsonUtility.FromJson<DatosConfiguracion>(json);
+            Debug.Log("Configuración default pública cargada.");
+            return;
+        }
+
+        // 3. Si no existe la pública (es la primera vez que se instala en estas gafas)
+        // La sacamos del "horno" (Resources) y la copiamos a la carpeta visible para ti
+        TextAsset defaultJson = Resources.Load<TextAsset>("default_config");
+        if (defaultJson != null)
+        {
+            configActual = JsonUtility.FromJson<DatosConfiguracion>(defaultJson.text);
+
+            if (!Directory.Exists(rutaInvitado)) Directory.CreateDirectory(rutaInvitado);
+            File.WriteAllText(rutaDefaultPublica, defaultJson.text);
+
+            Debug.Log("Configuración de fábrica extraída y guardada en carpeta Invitado para edición.");
         }
         else
         {
-            TextAsset defaultJson = Resources.Load<TextAsset>("default_config");
-            if (defaultJson != null)
-            {
-                configActual = JsonUtility.FromJson<DatosConfiguracion>(defaultJson.text);
-                Debug.Log("Configuración default cargada desde Resources.");
-            }
-            else
-            {
-                configActual = new DatosConfiguracion();
-                Debug.LogWarning("No se encontró default_config en Resources. Usando valores internos.");
-            }
+            configActual = new DatosConfiguracion();
+            string jsonGenerado = JsonUtility.ToJson(configActual, true);
+
+            if (!Directory.Exists(rutaInvitado)) Directory.CreateDirectory(rutaInvitado);
+            File.WriteAllText(rutaDefaultPublica, jsonGenerado);
+
+            Debug.LogWarning("No se encontró default_config en Resources. Creando una limpia en la carpeta Invitado.");
         }
     }
 

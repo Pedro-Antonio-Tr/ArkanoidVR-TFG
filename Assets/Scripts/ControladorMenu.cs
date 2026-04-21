@@ -15,11 +15,12 @@ public class ControladorMenu : MonoBehaviour
     public PunteroLaserVR laserDerecho;
     public UnityEngine.EventSystems.OVRInputModule inputModule;
 
-    [Header("Máquina de Estados (Paneles)")]
+    [Header("Paneles")]
     public GameObject panelBienvenida;
     public GameObject panelNiveles;
     public GameObject panelPausa;
     public GameObject panelAjustes;
+    public GameObject panelResultados;
 
     [Header("Botones de Modo (Para oscurecer en todos los menús)")]
     public Button[] botonesMandoIzq;
@@ -67,6 +68,10 @@ public class ControladorMenu : MonoBehaviour
     [Header("Sliders de Distancia")]
     public Slider sliderDistanciaMenu;
     public Slider sliderDistanciaPantalla;
+
+    [Header("Textos Panel Resultados")]
+    public TextMeshProUGUI textoTituloResultados;
+    public TextMeshProUGUI textoStatsResultados;
 
     private bool partidaTerminada = false;
 
@@ -181,8 +186,12 @@ public class ControladorMenu : MonoBehaviour
         if (estaActivado)
         {
             ColocarMenuDelanteDeLaMirada();
-
-            if (primeraVezAbierto)
+            if (partidaTerminada)
+            {
+                AbrirPanel(panelResultados);
+                partidaTerminada = false;
+            }
+            else if (primeraVezAbierto)
             {
                 AbrirPanel(panelBienvenida);
             }
@@ -205,6 +214,7 @@ public class ControladorMenu : MonoBehaviour
         panelNiveles.SetActive(false);
         panelPausa.SetActive(false);
         panelAjustes.SetActive(false);
+        panelResultados.SetActive(false);
 
         panelDestino.SetActive(true);
     }
@@ -607,15 +617,27 @@ public class ControladorMenu : MonoBehaviour
     {
         partidaTerminada = true;
 
-        if (textoStatsClinicas != null)
+        if (textoTituloResultados != null)
+        {
+            textoTituloResultados.text = titulo;
+        }
+
+        if (textoStatsResultados != null)
         {
             string tiempo = GestorArkanoid.Instancia.ObtenerTiempoFormateado();
             string nivel = "NIVEL " + (GestorArkanoid.Instancia.nivelElegido + 1);
             int bloques = GestorArkanoid.Instancia.bloquesRestantes;
 
-            textoStatsClinicas.text = $"<size=120%>{titulo}</size>\n\n" +
-                                     $"{nivel} | TIEMPO: {tiempo}\n" +
-                                     $"BLOQUES RESTANTES: {bloques}";
+            textoStatsResultados.text = $"{nivel}\nTIEMPO: {tiempo}\nBLOQUES RESTANTES: {bloques}";
+        }
+
+        if (!panelMenu.activeSelf)
+        {
+            AlternarMenuGeneral();
+        }
+        else
+        {
+            AbrirPanel(panelResultados); 
         }
     }
 
