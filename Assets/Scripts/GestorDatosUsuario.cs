@@ -3,28 +3,28 @@ using System.IO;
 using UnityEngine;
 
 [Serializable]
-public class DatosConfiguracion
+public class DatosConfiguracion //Pongo los valores del default porque en las gafas no lee el json bien ¿?
 {
-    public float volumen = 0.5f;
+    public float volumen = 1f;
     public int modoMando = 1;
-    public int dificultad = 1;
-    public float inclinacionPantallaX = 0f;
+    public int dificultad = 0;
+    public float inclinacionPantallaX = 358.27069091796877f;
 
     public bool pantallaCurva = false;
 
     // Calibración Brazo IZQUIERDO
-    public float centroX_L = 0f;
-    public float alcanceIzqX_L = -0.2f;
-    public float alcanceDerX_L = 0.2f;
+    public float centroX_L = 0.02702815644443035f;
+    public float alcanceIzqX_L = -0.41913095116615298f;
+    public float alcanceDerX_L = 0.3979409635066986f;
 
     // Calibración Brazo DERECHO
-    public float centroX_R = 0f;
-    public float alcanceIzqX_R = -0.2f;
-    public float alcanceDerX_R = 0.2f;
+    public float centroX_R = 0.062207408249378207f;
+    public float alcanceIzqX_R = -0.2471681386232376f;
+    public float alcanceDerX_R = 0.6305392980575562f;
 
-    public float distanciaMenu = 1.8f;
-    public float distanciaPlana = 3.7f;
-    public float distanciaCurva = 2.0f;
+    public float distanciaMenu = 3f;
+    public float distanciaPlana = 3.5854644775390627f;
+    public float distanciaCurva = 4.248764514923096f;
 }
 
 public class GestorDatosUsuario : MonoBehaviour

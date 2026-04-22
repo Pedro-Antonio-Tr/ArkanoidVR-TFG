@@ -21,7 +21,7 @@ public class ComportamientoPelota : MonoBehaviour
     private MeshRenderer rendererPelota;
 
     [Header("Ajustes Explosión")]
-    public float radioExplosion = 4f;
+    public float radioExplosion = 2.5f;
     public GameObject prefabEfectoExplosion;
 
     void Awake()
@@ -37,36 +37,44 @@ public class ComportamientoPelota : MonoBehaviour
         audioSourceLocal.spatialBlend = 0;
     }
 
-    // Update is called once per frame
     void Update()
     {
-        if(!lanzada)
+        if (!lanzada) return;
+
+        transform.localPosition = new Vector3(transform.localPosition.x, transform.localPosition.y, 0f);
+
+        rb.linearVelocity = rb.linearVelocity.normalized * velocidadActual;
+
+        Vector3 vel = rb.linearVelocity;
+        Vector3 pos = transform.localPosition;
+
+        // Límites de la pantalla 
+        float limiteX = 17.5f;
+        float limiteY_Superior = 10f;
+
+        if (pos.x > limiteX)
         {
-            return;
+            vel.x = -Mathf.Abs(vel.x);
+            pos.x = limiteX - 0.1f;
+        }
+        else if (pos.x < -limiteX)
+        {
+            vel.x = Mathf.Abs(vel.x);
+            pos.x = -limiteX + 0.1f;
         }
 
-        transform.localPosition = new UnityEngine.Vector3(transform.localPosition.x, transform.localPosition.y, 0f);
-        if (rb.linearVelocity.magnitude > 0.1f)
+        if (pos.y > limiteY_Superior)
         {
-            rb.linearVelocity = rb.linearVelocity.normalized * velocidadActual;
+            vel.y = -Mathf.Abs(vel.y);
+            pos.y = limiteY_Superior - 0.1f;
         }
 
-        UnityEngine.Vector3 velActual = rb.linearVelocity;
+        if (Mathf.Abs(vel.y) < 2f) vel.y = (vel.y >= 0) ? 2f : -2f;
+        if (Mathf.Abs(vel.x) < 1.5f) vel.x = (vel.x >= 0) ? 1.5f : -1.5f;
 
-        // Comprobamos si la velocidad vertical (Y) es peligrosamente baja (ej. menor a 2)
-        if (Mathf.Abs(velActual.y) < 2f)
-        {
-            velActual.y = (velActual.y >= 0) ? 2f : -2f;
-            rb.linearVelocity = velActual;
-        }
-        // Igual pero para la velocidad horizontal (X),
-        if (Mathf.Abs(velActual.x) < 1.5f) 
-        {
-            velActual.x = (velActual.x >= 0) ? 1.5f : -1.5f;
-            rb.linearVelocity = velActual;
-        }
+        transform.localPosition = pos;
+        rb.linearVelocity = vel;
 
-        // Comprobar si ha caído por debajo de la pala
         if (transform.localPosition.y < limiteInferiorY)
         {
             if (gestor != null) gestor.PelotaDestruida();

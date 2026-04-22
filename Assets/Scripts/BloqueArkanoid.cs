@@ -11,7 +11,7 @@ public class BloqueArkanoid : MonoBehaviour
     [Header("Mejoras")]
     public GameObject prefabMejoraMultibola;
     public GameObject prefabMejoraExplosiva;
-    [Range(0f, 100f)] public float probabilidadMejora = 5f;
+    [Range(0f, 100f)] public float probabilidadMejora = 4f;
 
     [Header("Efectos Visuales")]
     public Material materialGolpe;
