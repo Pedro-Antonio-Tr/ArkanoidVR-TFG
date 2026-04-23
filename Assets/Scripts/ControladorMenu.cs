@@ -94,6 +94,11 @@ public class ControladorMenu : MonoBehaviour
             ActualizarBotonesModo();
             ActualizarBotonesDificultad();
         }
+
+        if (GestorArkanoid.Instancia != null)
+        {
+            GestorArkanoid.Instancia.ActualizarCorazonesUI();
+        }
     }
 
     private System.Collections.IEnumerator RutinaAplicarConfiguracionInicial()
@@ -171,7 +176,8 @@ public class ControladorMenu : MonoBehaviour
 
     public void AlternarMenuGeneral()
     {
-        if (panelMenu == null || headAnchor == null || calibracionEnProceso) return;
+        //Añado que si el menú está abierto y no hay partida empezada ni en cuenta atrás, no se pueda cerrar el menú.
+        if (panelMenu == null || headAnchor == null || calibracionEnProceso || GestorArkanoid.Instancia == null || (panelMenu.activeSelf && !GestorArkanoid.Instancia.juegoEmpezado && !GestorArkanoid.Instancia.enCuentaAtras)) return;
 
         bool estaActivado = !panelMenu.activeSelf;
         panelMenu.SetActive(estaActivado);
@@ -447,7 +453,11 @@ public class ControladorMenu : MonoBehaviour
 
     public void BotonUI_VolverAAjustesAnterior()
     {
-        if (primeraVezAbierto)
+        if (partidaTerminada)
+        {
+            AbrirPanel(panelResultados);
+        }
+        else if (primeraVezAbierto)
         {
             AbrirPanel(panelBienvenida);
         }
@@ -500,6 +510,11 @@ public class ControladorMenu : MonoBehaviour
             MonitorClinico.Instancia.dificultadActual = (MonitorClinico.NivelDificultad)difElegida;
         }
         ActualizarBotonesDificultad();
+
+        if (GestorArkanoid.Instancia != null)
+        {
+            GestorArkanoid.Instancia.ActualizarCorazonesUI();
+        }
 
         if (GestorDatosUsuario.Instancia != null)
         {
@@ -628,7 +643,7 @@ public class ControladorMenu : MonoBehaviour
             string nivel = "NIVEL " + (GestorArkanoid.Instancia.nivelElegido + 1);
             int bloques = GestorArkanoid.Instancia.bloquesRestantes;
 
-            textoStatsResultados.text = $"{nivel}\nTIEMPO: {tiempo}\nBLOQUES RESTANTES: {bloques}";
+            textoStatsResultados.text = $"{nivel}\nTIEMPO: {tiempo}\nBLOQUES RESTANTES: {bloques}\n PUNTUACIÓN OBTENIDA: {GestorArkanoid.Instancia.puntuacionActual}";
         }
 
         if (!panelMenu.activeSelf)
@@ -668,9 +683,7 @@ public class ControladorMenu : MonoBehaviour
 
     public void CambiarDistanciaMenu(float nuevaDist)
     {
-        float distPantallaActual = sliderDistanciaPantalla.value;
-        nuevaDist = Mathf.Min(nuevaDist, distPantallaActual - 0.3f); //Para que siempre esté más cerca el menú que la pantalla de juego
-        sliderDistanciaMenu.value = nuevaDist; // Ajustamos el slider si se pasa
+        sliderDistanciaMenu.value = nuevaDist;
 
         distanciaMenu = nuevaDist;
         if (GestorDatosUsuario.Instancia != null)

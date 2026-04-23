@@ -53,6 +53,30 @@ public class GestorArkanoid : MonoBehaviour
     public float tiempoExplosivoRestante = 0f;
     public AudioClip sonidoExplosion;
 
+    [Header("Sistema de Vidas")]
+    public int vidasFacil = 3;
+    public int vidasNormal = 2;
+    public int vidasDificil = 1;
+    private int vidasActuales;
+    public int puntosPorVidaRestante = 500;
+
+    [Header("Puntuación")]
+    public int puntuacionActual = 0;
+    public int tiempoParSegundos = 300; // 5 minutos para el bonus por tiempo
+    public int puntosPorSegundoAhorrado = 25;
+
+    [Header("UI Vidas (Corazones)")]
+    public RectTransform contenedorCorazones;
+    public UnityEngine.UI.Image[] imagenesCorazones;
+    public Sprite spriteVidaLlena;
+    public Sprite spriteVidaVacia;
+
+    [Header("UI Puntuación")]
+    public TextMeshProUGUI textoPuntuacion;
+
+    private Vector3 posicionEsquinaCorazones;
+    private Vector3 escalaOriginalCorazones;
+
     // VARIABLES DE TIEMPO
     private float tiempoPartida = 0f;
     private bool cronometroActivo = false;
@@ -65,7 +89,7 @@ public class GestorArkanoid : MonoBehaviour
 
     void Start()
     {
-        textoMensajes.text = "ABRE EL MENÚ PARA EMPEZAR";
+        textoMensajes.text = "Abre el menú para empezar";
         textoEstadisticas.text = "";
         audioSourceUI = gameObject.AddComponent<AudioSource>();
         audioSourceUI.playOnAwake = false;
@@ -130,7 +154,10 @@ public class GestorArkanoid : MonoBehaviour
         {
             Destroy(nivelActualInstanciado);
         }
-
+        if (textoPuntuacion != null)
+        {
+            textoPuntuacion.text = "000000";
+        }
         nivelElegido = indice;
         if (listaDeNiveles.Length > 0)
         {
@@ -145,6 +172,12 @@ public class GestorArkanoid : MonoBehaviour
         textoMensajes.text = "";
         textoEstadisticas.text = "";
         tiempoPartida = 0f;
+        explosivoActivo = false;
+
+        puntuacionActual = 0;
+        CargarPrevisualizacion(nivelElegido);
+        ConfigurarVidasIniciales();
+
         StartCoroutine(RutinaInicioPartida());
     }
 
@@ -185,8 +218,6 @@ public class GestorArkanoid : MonoBehaviour
         {
             MonitorClinico.Instancia.ReiniciarContadoresLateralidad();
         }
-
-        CargarPrevisualizacion(nivelElegido);
 
         yield return new WaitForSeconds(0.1f);
         bloquesRestantes = GameObject.FindGameObjectsWithTag("Bloque").Length;
@@ -259,7 +290,10 @@ public class GestorArkanoid : MonoBehaviour
     public void PelotaDestruida()
     {
         pelotasEnJuego--;
-        if (pelotasEnJuego <= 0 && bloquesRestantes > 0) TerminarPartida("¡Has perdido!");
+        if (pelotasEnJuego <= 0 && bloquesRestantes > 0)
+        {
+            StartCoroutine(RutinaPerderVida());
+        }
     }
 
     public void BloqueDestruido()
@@ -285,10 +319,19 @@ public class GestorArkanoid : MonoBehaviour
         // Formatear tiempo en Minutos:Segundos
         int minutos = Mathf.FloorToInt(tiempoPartida / 60F);
         int segundos = Mathf.FloorToInt(tiempoPartida - minutos * 60);
-        textoEstadisticas.text = $"TIEMPO: {string.Format("{0:00}:{1:00}", minutos, segundos)}";
+        string tiempoFormat = string.Format("{0:00}:{1:00}", minutos, segundos);
+
+        int bonusTiempo = 0;
+        int bonusVidas = 0;
+
         string resultado = "Derrota";
         if (mensaje.Contains("COMPLETADO"))
         {
+            bonusVidas = vidasActuales * puntosPorVidaRestante;
+            float segundosAhorrados = Mathf.Max(0, tiempoParSegundos - tiempoPartida);
+            bonusTiempo = Mathf.RoundToInt(segundosAhorrados * puntosPorSegundoAhorrado);
+            puntuacionActual += bonusTiempo + bonusVidas;
+
             ReproducirSonidoGlobal(sonidoVictoria);
             resultado = "Victoria";
         }
@@ -300,6 +343,8 @@ public class GestorArkanoid : MonoBehaviour
         {
             ReproducirSonidoGlobal(sonidoDerrota);
         }
+        // Eliminado porque veo innecesario esto ahora
+        //textoEstadisticas.text = $"TIEMPO: {tiempoFormat}\nBONUS TIEMPO: +{bonusTiempo}\nBONUS VIDAS: +{bonusVidas}\n\nPUNTUACIÓN FINAL: {puntuacionActual}";
 
         if (GestorDatosUsuario.Instancia != null && MonitorClinico.Instancia != null)
         {
@@ -319,8 +364,14 @@ public class GestorArkanoid : MonoBehaviour
                 reaccion,
                 tiempoPartida,
                 golpesI,
-                golpesD
+                golpesD,
+                puntuacionActual,
+                vidasActuales
             );
+        }
+        if(textoPuntuacion != null)
+        {
+            textoPuntuacion.text = puntuacionActual.ToString("N0");
         }
         controladorMenu.MostrarResultadosFinales(mensaje);
     }
@@ -462,5 +513,113 @@ public class GestorArkanoid : MonoBehaviour
     public void ActualizarTextoRNG(string nuevoLog)
     {
         logRNG = nuevoLog;
+    }
+
+    private void ConfigurarVidasIniciales()
+    {
+        if (contenedorCorazones != null && posicionEsquinaCorazones == Vector3.zero)
+        {
+            posicionEsquinaCorazones = contenedorCorazones.localPosition;
+            escalaOriginalCorazones = contenedorCorazones.localScale;
+        }
+
+        // Leer dificultad y asignar vidas
+        if (MonitorClinico.Instancia != null)
+        {
+            if (MonitorClinico.Instancia.dificultadActual == MonitorClinico.NivelDificultad.Facil) vidasActuales = vidasFacil;
+            else if (MonitorClinico.Instancia.dificultadActual == MonitorClinico.NivelDificultad.Normal) vidasActuales = vidasNormal;
+            else vidasActuales = vidasDificil;
+        }
+
+        for (int i = 0; i < imagenesCorazones.Length; i++)
+        {
+            imagenesCorazones[i].gameObject.SetActive(i < vidasActuales);
+            imagenesCorazones[i].sprite = spriteVidaLlena;
+        }
+    }
+
+    public void SumarPuntos(int puntosBloque)
+    {
+        float multiplicador = 1.0f;
+        if (MonitorClinico.Instancia != null)
+        {
+            if (MonitorClinico.Instancia.dificultadActual == MonitorClinico.NivelDificultad.Normal) multiplicador = 1.5f;
+            else if (MonitorClinico.Instancia.dificultadActual == MonitorClinico.NivelDificultad.Dificil) multiplicador = 2.0f;
+        }
+
+        puntuacionActual += Mathf.RoundToInt(puntosBloque * multiplicador);
+        if (textoPuntuacion != null)
+            textoPuntuacion.text = puntuacionActual.ToString("N0");
+    }
+
+    private IEnumerator RutinaPerderVida()
+    {
+        enCuentaAtras = true;
+        float duracionAnim = 1f;
+        float tiempo = 0f;
+
+        // Hacemos zoom y movimiento hacia el centro del contenedor de corazones
+        if (contenedorCorazones != null)
+        {
+            while (tiempo < duracionAnim)
+            {
+                tiempo += Time.deltaTime;
+                float t = Mathf.SmoothStep(0f, 1f, tiempo / duracionAnim);
+                contenedorCorazones.localPosition = Vector3.Lerp(posicionEsquinaCorazones, Vector3.zero, t);
+                contenedorCorazones.localScale = Vector3.Lerp(escalaOriginalCorazones, escalaOriginalCorazones * 2.5f, t);
+                yield return null;
+            }
+        }
+
+        yield return new WaitForSeconds(0.5f);
+
+        vidasActuales--;
+        if (vidasActuales >= 0 && vidasActuales < imagenesCorazones.Length)
+        {
+            imagenesCorazones[vidasActuales].sprite = spriteVidaVacia;
+            ReproducirSonidoGlobal(sonidoDerrota);
+        }
+
+        yield return new WaitForSeconds(1.5f);
+
+        tiempo = 0f;
+        if (contenedorCorazones != null)
+        {
+            while (tiempo < duracionAnim)
+            {
+                tiempo += Time.deltaTime;
+                float t = Mathf.SmoothStep(0f, 1f, tiempo / duracionAnim);
+                contenedorCorazones.localPosition = Vector3.Lerp(Vector3.zero, posicionEsquinaCorazones, t);
+                contenedorCorazones.localScale = Vector3.Lerp(escalaOriginalCorazones * 2.5f, escalaOriginalCorazones, t);
+                yield return null;
+            }
+        }
+
+        if (vidasActuales <= 0)
+        {
+            TerminarPartida("¡Has perdido!");
+        }
+        else
+        {
+            StartCoroutine(RutinaInicioPartida());
+        }
+    }
+
+    public void ActualizarCorazonesUI()
+    {
+        int vidasConfig = 0;
+        if (MonitorClinico.Instancia != null)
+        {
+            var dif = MonitorClinico.Instancia.dificultadActual;
+            if (dif == MonitorClinico.NivelDificultad.Facil) vidasConfig = vidasFacil;
+            else if (dif == MonitorClinico.NivelDificultad.Normal) vidasConfig = vidasNormal;
+            else vidasConfig = vidasDificil;
+        }
+
+        for (int i = 0; i < imagenesCorazones.Length; i++)
+        {
+            imagenesCorazones[i].gameObject.SetActive(i < vidasConfig);
+            imagenesCorazones[i].sprite = spriteVidaLlena;
+        }
     }
 }

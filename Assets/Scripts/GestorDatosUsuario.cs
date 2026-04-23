@@ -174,9 +174,10 @@ public class GestorDatosUsuario : MonoBehaviour
 
             Debug.LogWarning("No se encontró default_config en Resources. Creando una limpia en la carpeta Invitado.");
         }
+        GestorArkanoid.Instancia.ActualizarCorazonesUI();
     }
 
-    public void GuardarPartidaCSV(string nivel, string dificultad, string resultado, int bloques, float fatiga, float reaccion, float duracion, int golpesI, int golpesD)
+    public void GuardarPartidaCSV(string nivel, string dificultad, string resultado, int bloques, float fatiga, float reaccion, float duracion, int golpesI, int golpesD, int puntos, int vidas)
     {
         string ruta = Path.Combine(RutaUsuario, "historial_partidas.csv");
         bool existe = File.Exists(ruta);
@@ -185,9 +186,9 @@ public class GestorDatosUsuario : MonoBehaviour
         {
             if (!existe)
             {
-                sw.WriteLine("FechaHora;Nivel;Dificultad;Duracion(s);Resultado;BloquesRestantes;IndiceFatiga;ReaccionMedia(s);Golpes_IZQ;Golpes_DER");
+                sw.WriteLine("FechaHora;Nivel;Dificultad;Duracion(s);Resultado;BloquesRestantes;IndiceFatiga;ReaccionMedia(s);Golpes_IZQ;Golpes_DER;Puntuacion;VidasRestantes");
             }
-            sw.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss};{nivel};{dificultad};{duracion:F1};{resultado};{bloques};{fatiga:F2};{reaccion:F2};{golpesI};{golpesD}");
+            sw.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss};{nivel};{dificultad};{duracion:F1};{resultado};{bloques};{fatiga:F2};{reaccion:F2};{golpesI};{golpesD};{puntos};{vidas}");
         }
     }
 }

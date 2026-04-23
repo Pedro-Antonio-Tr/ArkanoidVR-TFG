@@ -24,6 +24,9 @@ public class BloqueArkanoid : MonoBehaviour
     public AudioClip sonidoRotura;
     private AudioSource audioSourceLocal;
 
+    [Header("Puntuación")]
+    public int puntosBase = 100;
+
     void Start()
     {
         renderizador = GetComponent<MeshRenderer>();
@@ -85,6 +88,10 @@ public class BloqueArkanoid : MonoBehaviour
 
         if (puntosDeVida <= 0)
         {
+            if (GestorArkanoid.Instancia != null)
+            {
+                GestorArkanoid.Instancia.SumarPuntos(puntosBase);
+            }
             if (sonidoRotura != null)
             {
                 GestorArkanoid.Instancia.ReproducirSonidoGlobal(sonidoRotura);
