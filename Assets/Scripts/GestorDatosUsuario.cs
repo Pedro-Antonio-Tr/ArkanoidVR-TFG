@@ -191,4 +191,36 @@ public class GestorDatosUsuario : MonoBehaviour
             sw.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss};{nivel};{dificultad};{duracion:F1};{resultado};{bloques};{fatiga:F2};{reaccion:F2};{golpesI};{golpesD};{puntos};{vidas}");
         }
     }
+
+    public int ObtenerRecordPorNivel(string nombreNivel)
+    {
+        string ruta = Path.Combine(RutaUsuario, "historial_partidas.csv");
+        if (!File.Exists(ruta)) return 0;
+
+        int recordMaximo = 0;
+
+        try
+        {
+            string[] lineas = File.ReadAllLines(ruta);
+            // Empezamos en 1 para saltar la cabecera
+            for (int i = 1; i < lineas.Length; i++)
+            {
+                string[] columnas = lineas[i].Split(';');
+                // Columna 1: Nivel, Columna 10: Puntuación
+                if (columnas.Length > 10 && columnas[1] == nombreNivel)
+                {
+                    if (int.TryParse(columnas[10], out int puntos))
+                    {
+                        if (puntos > recordMaximo) recordMaximo = puntos;
+                    }
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("Error leyendo récords: " + e.Message);
+        }
+
+        return recordMaximo;
+    }
 }

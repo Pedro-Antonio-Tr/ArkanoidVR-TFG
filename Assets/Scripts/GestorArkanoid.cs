@@ -74,6 +74,9 @@ public class GestorArkanoid : MonoBehaviour
     [Header("UI Puntuación")]
     public TextMeshProUGUI textoPuntuacion;
 
+    private int recordDelNivel = 0;
+    private bool recordSuperado = false;
+
     private Vector3 posicionEsquinaCorazones;
     private Vector3 escalaOriginalCorazones;
 
@@ -90,7 +93,7 @@ public class GestorArkanoid : MonoBehaviour
     void Start()
     {
         textoMensajes.text = "Abre el menú para empezar";
-        textoEstadisticas.text = "";
+        if (textoEstadisticas != null) textoEstadisticas.text = "";
         audioSourceUI = gameObject.AddComponent<AudioSource>();
         audioSourceUI.playOnAwake = false;
         if (textoDebug != null)
@@ -170,11 +173,17 @@ public class GestorArkanoid : MonoBehaviour
         Time.timeScale = 1f;
         LimpiarPelotas();
         textoMensajes.text = "";
-        textoEstadisticas.text = "";
+        if (textoEstadisticas != null) textoEstadisticas.text = "";
         tiempoPartida = 0f;
         explosivoActivo = false;
 
+        recordSuperado = false;
         puntuacionActual = 0;
+        if (GestorDatosUsuario.Instancia != null)
+        {
+            recordDelNivel = GestorDatosUsuario.Instancia.ObtenerRecordPorNivel($"Nivel {nivelElegido + 1}");
+        }
+        ActualizarTextoPuntuacion();
         CargarPrevisualizacion(nivelElegido);
         ConfigurarVidasIniciales();
 
@@ -196,7 +205,7 @@ public class GestorArkanoid : MonoBehaviour
         cronometroActivo = false;
         LimpiarPelotas();
         textoMensajes.text = "ABRE EL MENÚ PARA EMPEZAR";
-        textoEstadisticas.text = "";
+        if (textoEstadisticas != null) textoEstadisticas.text = "";
         if (MonitorClinico.Instancia != null)
         {
             MonitorClinico.Instancia.DetenerTelemetria();
@@ -229,19 +238,19 @@ public class GestorArkanoid : MonoBehaviour
         animandoPendulo = true;
 
         textoMensajes.text = "3";
-        if (sonidoCuentaAtras != null)
+        if (sonidoCuentaAtras != null && audioSourceUI != null)
         {
             audioSourceUI.PlayOneShot(sonidoCuentaAtras);
         }
         yield return new WaitForSeconds(1f);
         textoMensajes.text = "2";
-        if (sonidoCuentaAtras != null)
+        if (sonidoCuentaAtras != null && audioSourceUI != null)
         {
             audioSourceUI.PlayOneShot(sonidoCuentaAtras);
         }
         yield return new WaitForSeconds(1f);
         textoMensajes.text = "1";
-        if (sonidoCuentaAtras != null)
+        if (sonidoCuentaAtras != null && audioSourceUI != null)
         {
             audioSourceUI.PlayOneShot(sonidoCuentaAtras);
         }
@@ -548,8 +557,7 @@ public class GestorArkanoid : MonoBehaviour
         }
 
         puntuacionActual += Mathf.RoundToInt(puntosBloque * multiplicador);
-        if (textoPuntuacion != null)
-            textoPuntuacion.text = puntuacionActual.ToString("N0");
+        ActualizarTextoPuntuacion();
     }
 
     private IEnumerator RutinaPerderVida()
@@ -621,5 +629,25 @@ public class GestorArkanoid : MonoBehaviour
             imagenesCorazones[i].gameObject.SetActive(i < vidasConfig);
             imagenesCorazones[i].sprite = spriteVidaLlena;
         }
+    }
+
+    private void ActualizarTextoPuntuacion()
+    {
+        if (textoPuntuacion == null) return;
+
+        string colorPuntos = "white"; // Color normal
+
+        if (puntuacionActual > recordDelNivel && recordDelNivel > 0)
+        {
+            colorPuntos = "yellow"; // ¡Nuevo récord en marcha!
+            recordSuperado = true;
+        }
+
+        textoPuntuacion.text = $"PUNTOS: <color={colorPuntos}>{puntuacionActual:N0}</color>\n<size=80%>RÉCORD: {recordDelNivel:N0}</size>";
+    }
+
+    public int ObtenerRecordPrevio()
+    {
+        return recordDelNivel;
     }
 }

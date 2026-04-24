@@ -639,11 +639,30 @@ public class ControladorMenu : MonoBehaviour
 
         if (textoStatsResultados != null)
         {
+            int puntosActuales = GestorArkanoid.Instancia.puntuacionActual;
+            int recordAnterior = GestorArkanoid.Instancia.ObtenerRecordPrevio();
+
             string tiempo = GestorArkanoid.Instancia.ObtenerTiempoFormateado();
             string nivel = "NIVEL " + (GestorArkanoid.Instancia.nivelElegido + 1);
             int bloques = GestorArkanoid.Instancia.bloquesRestantes;
+            string puntuacion = "";
+            if (puntosActuales > recordAnterior && recordAnterior > 0)
+            {
+                puntuacion = $"<color=yellow>¡NUEVO RÉCORD!</color>\n\n" +
+                                         $"PUNTUACIÓN: {puntosActuales:N0}\n" +
+                                         $"<size=70%>(Récord anterior: {recordAnterior:N0})</size>";
+            }
+            else if (recordAnterior > 0)
+            {
+                puntuacion = $"PUNTUACIÓN: {puntosActuales:N0}\n" +
+                                         $"<size=70%>RÉCORD DEL NIVEL: {Mathf.Max(puntosActuales, recordAnterior):N0}</size>";
+            }
+            else
+            {
+                puntuacion = $"PUNTUACIÓN: {puntosActuales} PUNTOS";
+            }
 
-            textoStatsResultados.text = $"{nivel}\nTIEMPO: {tiempo}\nBLOQUES RESTANTES: {bloques}\n PUNTUACIÓN OBTENIDA: {GestorArkanoid.Instancia.puntuacionActual}";
+            textoStatsResultados.text = $"{nivel}\nTIEMPO: {tiempo}\nBLOQUES RESTANTES: {bloques}\n" + puntuacion;
         }
 
         if (!panelMenu.activeSelf)
