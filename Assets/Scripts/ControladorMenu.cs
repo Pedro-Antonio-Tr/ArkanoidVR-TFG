@@ -73,6 +73,15 @@ public class ControladorMenu : MonoBehaviour
     public TextMeshProUGUI textoTituloResultados;
     public TextMeshProUGUI textoStatsResultados;
 
+    [Header("Imágenes de Calibración")]
+    public Image imagenCalibracion;
+    public Sprite imgBrazoIzq_Centro;
+    public Sprite imgBrazoIzq_EstiradoIzq;
+    public Sprite imgBrazoIzq_EstiradoDer;
+    public Sprite imgBrazoDer_Centro;
+    public Sprite imgBrazoDer_EstiradoIzq;
+    public Sprite imgBrazoDer_EstiradoDer;
+
     private bool partidaTerminada = false;
 
     void Start()
@@ -565,6 +574,8 @@ public class ControladorMenu : MonoBehaviour
         panelAjustes.SetActive(false);
         panelCuentaAtras.SetActive(true);
 
+        ActualizarLaseres(false);
+
         MonitorClinico.ModoControl modo = MonitorClinico.Instancia.modoActual;
 
         // Si el modo es "Ambos", calibramos primero un brazo y luego el otro
@@ -588,17 +599,23 @@ public class ControladorMenu : MonoBehaviour
         panelCuentaAtras.SetActive(false);
         panelAjustes.SetActive(true);
         calibracionEnProceso = false;
+        ActualizarLaseres(true);
     }
 
     private System.Collections.IEnumerator CalibrarBrazoCompleto(OVRInput.Controller mando, string nombreBrazo)
     {
-        yield return FaseContador(nombreBrazo + ": PON EL MANDO EN EL CENTRO");
+        bool esBrazoIzquierdo = (mando == OVRInput.Controller.LTouch);
+
+        Sprite imgCentro = esBrazoIzquierdo ? imgBrazoIzq_Centro : imgBrazoDer_Centro;
+        yield return FaseContador(nombreBrazo + ": PON EL MANDO EN EL CENTRO", imgCentro);
         float centro = OVRInput.GetLocalControllerPosition(mando).x;
 
-        yield return FaseContador(nombreBrazo + ": ESTIRA A LA IZQUIERDA");
+        Sprite imgIzq = esBrazoIzquierdo ? imgBrazoIzq_EstiradoIzq : imgBrazoDer_EstiradoIzq;
+        yield return FaseContador(nombreBrazo + ": ESTIRA A LA IZQUIERDA", imgIzq);
         float izq = OVRInput.GetLocalControllerPosition(mando).x;
 
-        yield return FaseContador(nombreBrazo + ": ESTIRA A LA DERECHA");
+        Sprite imgDer = esBrazoIzquierdo ? imgBrazoIzq_EstiradoDer : imgBrazoDer_EstiradoDer;
+        yield return FaseContador(nombreBrazo + ": ESTIRA A LA DERECHA", imgDer);
         float der = OVRInput.GetLocalControllerPosition(mando).x;
 
         if (mando == OVRInput.Controller.LTouch)
@@ -615,9 +632,16 @@ public class ControladorMenu : MonoBehaviour
         }
     }
 
-    private System.Collections.IEnumerator FaseContador(string instruccion)
+    private System.Collections.IEnumerator FaseContador(string instruccion, Sprite imagenAMostrar)
     {
         textoInstrucciones.text = instruccion;
+
+        if (imagenCalibracion != null && imagenAMostrar != null)
+        {
+            imagenCalibracion.gameObject.SetActive(true);
+            imagenCalibracion.sprite = imagenAMostrar;
+        }
+
         for (int i = 5; i > 0; i--)
         {
             textoCuentaAtras.text = i.ToString();
