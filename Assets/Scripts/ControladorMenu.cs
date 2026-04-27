@@ -173,6 +173,7 @@ public class ControladorMenu : MonoBehaviour
             partidaTerminada = false;
             AlternarMenuGeneral();
         }
+        ColocarMenuDelanteDeLaMirada();
     }
 
     public void ReproducirSonidoClic()
@@ -190,6 +191,7 @@ public class ControladorMenu : MonoBehaviour
 
         bool estaActivado = !panelMenu.activeSelf;
         panelMenu.SetActive(estaActivado);
+        pantallaArkanoid.gameObject.SetActive(!estaActivado);
 
         ActualizarLaseres(estaActivado);
 
