@@ -173,6 +173,10 @@ public class ControladorMenu : MonoBehaviour
             partidaTerminada = false;
             AlternarMenuGeneral();
         }
+        if(OVRInput.GetDown(OVRInput.Button.Two) || OVRInput.GetDown(OVRInput.Button.Four))
+        {
+            CentrarVistaUsuario();
+        }
         ColocarMenuDelanteDeLaMirada();
     }
 
@@ -723,7 +727,16 @@ public class ControladorMenu : MonoBehaviour
         if (pantallaPlana != null) pantallaPlana.SetActive(!activarCurva);
         if (pantallaCurva != null) pantallaCurva.SetActive(activarCurva);
 
-        CentrarVistaUsuario();
+        if (activarCurva)
+        {
+            sliderDistanciaPantalla.MinValue = 4f;
+        } 
+        else
+        {
+            sliderDistanciaPantalla.MinValue = 3f;
+        }
+
+            CentrarVistaUsuario();
     }
 
     public void CambiarDistanciaMenu(float nuevaDist)
