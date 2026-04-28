@@ -11,7 +11,7 @@ public class MonitorClinico : MonoBehaviour
     public enum NivelDificultad { Facil, Normal, Dificil }
 
     [Header("Ajustes de Dificultad")]
-    public NivelDificultad dificultadActual = NivelDificultad.Normal;
+    public NivelDificultad dificultadActual = NivelDificultad.Facil;
 
     [Header("Configuración Actual")]
     public ModoControl modoActual = ModoControl.Derecho;

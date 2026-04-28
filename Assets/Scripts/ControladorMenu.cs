@@ -82,6 +82,12 @@ public class ControladorMenu : MonoBehaviour
     public Sprite imgBrazoDer_EstiradoIzq;
     public Sprite imgBrazoDer_EstiradoDer;
 
+    [Header("Sistema de Atención")]
+    public float anguloTolerancia = 45f; // Grados que puede girar la cabeza sin que salte el aviso
+    public float tiempoParaAviso = 3f; // Segundos seguidos que tiene que estar mirando fuera
+    private float tiempoMirandoFuera = 0f;
+    private float cooldownAviso = 0f;
+
     private bool partidaTerminada = false;
 
     void Start()
@@ -176,8 +182,11 @@ public class ControladorMenu : MonoBehaviour
         if(OVRInput.GetDown(OVRInput.Button.Two) || OVRInput.GetDown(OVRInput.Button.Four))
         {
             CentrarVistaUsuario();
+            tiempoMirandoFuera = 0f;
+            cooldownAviso = 15f;
         }
         ColocarMenuDelanteDeLaMirada();
+        ComprobarAtencionJugador();
     }
 
     public void ReproducirSonidoClic()
@@ -289,9 +298,23 @@ public class ControladorMenu : MonoBehaviour
         Vector3 targetPos = headPos + (lookDirection.normalized * distanciaMenu);
         targetPos.y = Mathf.Max(targetPos.y, headPos.y - 0.2f);
 
-        transform.position = targetPos;
-        transform.LookAt(headPos);
-        transform.Rotate(0, 180, 0);
+        float distanciaAlObjetivo = Vector3.Distance(transform.position, targetPos);
+
+        if (distanciaAlObjetivo > 1.5f)
+        {
+            transform.position = targetPos;
+        }
+        else
+        {
+            transform.position = Vector3.Lerp(transform.position, targetPos, Time.deltaTime * 5f);
+        }
+
+        Vector3 direccionHaciaCabeza = transform.position - headPos;
+        if (direccionHaciaCabeza != Vector3.zero)
+        {
+            Quaternion rotacionIdeal = Quaternion.LookRotation(direccionHaciaCabeza);
+            transform.rotation = Quaternion.Slerp(transform.rotation, rotacionIdeal, Time.deltaTime * 5f);
+        }
     }
 
     public void BotonUI_CambiarMandoActivo(int modoElegido)
@@ -419,6 +442,10 @@ public class ControladorMenu : MonoBehaviour
     public void BotonUI_AvanzarDesdeBienvenida()
     {
         primeraVezAbierto = false;
+        if (NotificacionFlotanteVR.Instancia != null)
+        {
+            NotificacionFlotanteVR.Instancia.MostrarNotificacion($"Si quieres centrar la vista, pulsa el botón Y o el botón B", 5f); // Podría meter luego que se detecte el mando con el que se está jugando para indicar solo el botón de ese mando
+        }
         AbrirPanel(panelNiveles);
         CambiarNivel(0);
     }
@@ -540,7 +567,7 @@ public class ControladorMenu : MonoBehaviour
 
     private void ActualizarBotonesDificultad()
     {
-        MonitorClinico.NivelDificultad dif = MonitorClinico.NivelDificultad.Normal;
+        MonitorClinico.NivelDificultad dif = MonitorClinico.NivelDificultad.Facil;
         if (MonitorClinico.Instancia != null)
         {
             dif = MonitorClinico.Instancia.dificultadActual;
@@ -566,6 +593,11 @@ public class ControladorMenu : MonoBehaviour
             {
                 btn.interactable = (dif != MonitorClinico.NivelDificultad.Dificil);
             }
+        }
+
+        if (GestorArkanoid.Instancia != null)
+        {
+            GestorArkanoid.Instancia.ActualizarCorazonesUI();
         }
     }
 
@@ -729,11 +761,11 @@ public class ControladorMenu : MonoBehaviour
 
         if (activarCurva)
         {
-            sliderDistanciaPantalla.MinValue = 4f;
+            sliderDistanciaPantalla.minValue = 4f;
         } 
         else
         {
-            sliderDistanciaPantalla.MinValue = 3f;
+            sliderDistanciaPantalla.minValue = 3f;
         }
 
             CentrarVistaUsuario();
@@ -776,4 +808,45 @@ public class ControladorMenu : MonoBehaviour
 
         CentrarVistaUsuario();
     }
+
+    void ComprobarAtencionJugador()
+    {
+        if (GestorArkanoid.Instancia == null || (!GestorArkanoid.Instancia.juegoEmpezado && !GestorArkanoid.Instancia.enCuentaAtras))
+            return;
+
+        if (pantallaArkanoid == null || !pantallaArkanoid.gameObject.activeSelf)
+            return;
+
+        if (cooldownAviso > 0)
+        {
+            cooldownAviso -= Time.deltaTime;
+        }
+
+        Vector3 direccionHaciaPantalla = (pantallaArkanoid.position - headAnchor.position).normalized;
+
+        float anguloDesvio = Vector3.Angle(headAnchor.forward, direccionHaciaPantalla);
+
+        // Si el ángulo es mayor que la tolerancia, empezamos a contar
+        if (anguloDesvio > anguloTolerancia)
+        {
+            tiempoMirandoFuera += Time.deltaTime;
+
+            // Si ha pasado el tiempo límite y no estamos en cooldown, avisamos
+            if (tiempoMirandoFuera >= tiempoParaAviso && cooldownAviso <= 0)
+            {
+                if (NotificacionFlotanteVR.Instancia != null)
+                {
+                    NotificacionFlotanteVR.Instancia.MostrarNotificacion("Puedes centrar la pantalla pulsando Y o B.", 4f);
+                }
+
+                tiempoMirandoFuera = 0f;
+                cooldownAviso = 10f;
+            }
+        }
+        else
+        {
+            tiempoMirandoFuera = 0f;
+        }
+    }
+
 }

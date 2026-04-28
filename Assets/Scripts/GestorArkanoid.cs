@@ -75,7 +75,6 @@ public class GestorArkanoid : MonoBehaviour
     public TextMeshProUGUI textoPuntuacion;
 
     private int recordDelNivel = 0;
-    private bool recordSuperado = false;
 
     private Vector3 posicionEsquinaCorazones;
     private Vector3 escalaOriginalCorazones;
@@ -92,7 +91,7 @@ public class GestorArkanoid : MonoBehaviour
 
     void Start()
     {
-        textoMensajes.text = "Abre el menú para empezar";
+        textoMensajes.text = "Elige un nivel para comenzar";
         if (textoEstadisticas != null) textoEstadisticas.text = "";
         audioSourceUI = gameObject.AddComponent<AudioSource>();
         audioSourceUI.playOnAwake = false;
@@ -177,7 +176,6 @@ public class GestorArkanoid : MonoBehaviour
         tiempoPartida = 0f;
         explosivoActivo = false;
 
-        recordSuperado = false;
         puntuacionActual = 0;
         if (GestorDatosUsuario.Instancia != null)
         {
@@ -188,6 +186,10 @@ public class GestorArkanoid : MonoBehaviour
         ConfigurarVidasIniciales();
 
         StartCoroutine(RutinaInicioPartida());
+        if (NotificacionFlotanteVR.Instancia != null)
+        {
+            NotificacionFlotanteVR.Instancia.MostrarNotificacion($"Puedes pausar la partida en cualquier momento pulsando el botón A o el botón X", 5f);
+        }
     }
 
     public void ReiniciarNivelActual()
@@ -204,7 +206,7 @@ public class GestorArkanoid : MonoBehaviour
         enCuentaAtras = false;
         cronometroActivo = false;
         LimpiarPelotas();
-        textoMensajes.text = "ABRE EL MENÚ PARA EMPEZAR";
+        textoMensajes.text = "Elige un nivel para comenzar";
         if (textoEstadisticas != null) textoEstadisticas.text = "";
         if (MonitorClinico.Instancia != null)
         {
@@ -351,6 +353,10 @@ public class GestorArkanoid : MonoBehaviour
         else
         {
             ReproducirSonidoGlobal(sonidoDerrota);
+            if(NotificacionFlotante.Instancia != null)
+            {
+                NotificacionFlotanteVR.Instancia.MostrarNotificacion($"Si sientes que el juego no está calibrado, se recomienda mantener pulsado el botón Meta unos segundos y calibrar en ajustes", 5f);
+            }
         }
         // Eliminado porque veo innecesario esto ahora
         //textoEstadisticas.text = $"TIEMPO: {tiempoFormat}\nBONUS TIEMPO: +{bonusTiempo}\nBONUS VIDAS: +{bonusVidas}\n\nPUNTUACIÓN FINAL: {puntuacionActual}";
@@ -403,7 +409,7 @@ public class GestorArkanoid : MonoBehaviour
             Time.timeScale = 0f;
             cronometroActivo = false;
             // No pisamos el número de la cuenta atrás si está en proceso
-            if (!enCuentaAtras) textoMensajes.text = "PAUSA";
+            if (!enCuentaAtras) textoMensajes.text = "Partida pausada";
         }
         else
         {
@@ -639,8 +645,7 @@ public class GestorArkanoid : MonoBehaviour
 
         if (puntuacionActual > recordDelNivel && recordDelNivel > 0)
         {
-            colorPuntos = "yellow"; // ¡Nuevo récord en marcha!
-            recordSuperado = true;
+            colorPuntos = "yellow";
         }
 
         textoPuntuacion.text = $"PUNTOS: <color={colorPuntos}>{puntuacionActual:N0}</color>\n<size=80%>RÉCORD: {recordDelNivel:N0}</size>";
