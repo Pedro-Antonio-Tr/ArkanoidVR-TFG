@@ -353,7 +353,7 @@ public class GestorArkanoid : MonoBehaviour
         else
         {
             ReproducirSonidoGlobal(sonidoDerrota);
-            if(NotificacionFlotante.Instancia != null)
+            if(NotificacionFlotanteVR.Instancia != null)
             {
                 NotificacionFlotanteVR.Instancia.MostrarNotificacion($"Si sientes que el juego no está calibrado, se recomienda mantener pulsado el botón Meta unos segundos y calibrar en ajustes", 5f);
             }
