@@ -13,7 +13,7 @@ public class NotificacionFlotanteVR : MonoBehaviour
 
     [Header("Ajustes de Seguimiento (Lazy HUD)")]
     public float distanciaAdelante = 0.5f;
-    public float desplazamientoAbajo = -0.25f; // Un poco por debajo de la línea de los ojos
+    public float desplazamientoAbajo = -0.3f; // Un poco por debajo de la línea de los ojos
     public float velocidadSeguimiento = 5f;
 
     private Coroutine rutinaOcultar;

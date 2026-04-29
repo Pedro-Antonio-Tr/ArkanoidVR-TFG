@@ -1424,7 +1424,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: -98, y: -15}
-  m_SizeDelta: {x: 93, y: 20}
+  m_SizeDelta: {x: 100, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &56589418
 MonoBehaviour:
@@ -1446,7 +1446,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Distancia juego
+  m_text: Distancia del juego
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1473,8 +1473,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 13
-  m_fontSizeBase: 13
+  m_fontSize: 11
+  m_fontSizeBase: 11
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -3598,8 +3598,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -98, y: 10}
-  m_SizeDelta: {x: 91, y: 20}
+  m_AnchoredPosition: {x: -96, y: 10}
+  m_SizeDelta: {x: 100, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &181108747
 MonoBehaviour:
@@ -3621,7 +3621,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Distancia men\xFA"
+  m_text: "Tama\xF1o del men\xFA"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -3648,8 +3648,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 13
-  m_fontSizeBase: 13
+  m_fontSize: 11
+  m_fontSizeBase: 11
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -21237,8 +21237,8 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1157330727}
-  m_LocalRotation: {x: 0, y: -0.00000004371139, z: 0, w: -1}
-  m_LocalPosition: {x: 0, y: 0, z: 3}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: -1}
+  m_LocalPosition: {x: 0, y: 0, z: 2.5}
   m_LocalScale: {x: 0.01, y: 0.01, z: 0.01}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -21308,7 +21308,7 @@ MonoBehaviour:
   - {fileID: 871263448}
   pantallaArkanoid: {fileID: 251155225}
   distanciaPantallaArkanoid: 4
-  distanciaMenu: 3
+  tamanoMenu: 1.019
   textoNumNivel: {fileID: 1050668206}
   textoStatsClinicas: {fileID: 1295690408}
   panelCuentaAtras: {fileID: 487324546}
@@ -21320,7 +21320,7 @@ MonoBehaviour:
   togglePantallaCurva: {fileID: 1058561842}
   pantallaPlana: {fileID: 1865414026}
   pantallaCurva: {fileID: 225636974}
-  sliderDistanciaMenu: {fileID: 1161955903}
+  sliderTamanoMenu: {fileID: 1161955903}
   sliderDistanciaPantalla: {fileID: 1927823212}
   textoTituloResultados: {fileID: 2122296142}
   textoStatsResultados: {fileID: 1594596322}
@@ -21331,6 +21331,9 @@ MonoBehaviour:
   imgBrazoDer_Centro: {fileID: 21300000, guid: fa091e62a00d8a54399913514508c161, type: 3}
   imgBrazoDer_EstiradoIzq: {fileID: 21300000, guid: 7902d984078b93f43b9410c608b58505, type: 3}
   imgBrazoDer_EstiradoDer: {fileID: 21300000, guid: 61370b48960617b41825c95beecd8353, type: 3}
+  anguloTolerancia: 45
+  tiempoParaAviso: 3
+  escalaBaseMenu: {x: 0, y: 0, z: 0}
 --- !u!65 &1157330734
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -21394,7 +21397,7 @@ GameObject:
   - component: {fileID: 1161955902}
   - component: {fileID: 1161955903}
   m_Layer: 5
-  m_Name: Slider_Dist_Menu
+  m_Name: Slider_Tamano_Menu
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -21466,22 +21469,22 @@ MonoBehaviour:
   m_FillRect: {fileID: 725660452}
   m_HandleRect: {fileID: 1668514469}
   m_Direction: 0
-  m_MinValue: 2
-  m_MaxValue: 3
+  m_MinValue: 0.5
+  m_MaxValue: 1.5
   m_WholeNumbers: 0
-  m_Value: 3
+  m_Value: 1.019
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1157330733}
         m_TargetAssemblyTypeName: ControladorMenu, Assembly-CSharp
-        m_MethodName: CambiarDistanciaMenu
+        m_MethodName: CambiarTamanoMenu
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
-          m_FloatArgument: 0
+          m_FloatArgument: 1
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 1
@@ -32628,7 +32631,7 @@ MonoBehaviour:
     centroX_R: 0
     alcanceIzqX_R: -0.2
     alcanceDerX_R: 0.2
-    distanciaMenu: 1.8
+    tamanoMenu: 1
     distanciaPlana: 3.7
     distanciaCurva: 2
 --- !u!4 &1800588759
@@ -33637,8 +33640,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 13
-  m_fontSizeBase: 13
+  m_fontSize: 11
+  m_fontSizeBase: 11
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18

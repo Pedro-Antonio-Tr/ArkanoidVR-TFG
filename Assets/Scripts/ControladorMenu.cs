@@ -35,7 +35,7 @@ public class ControladorMenu : MonoBehaviour
     [Header("Centrado de Vista")]
     public Transform pantallaArkanoid;
     public float distanciaPantallaArkanoid = 3.5f;
-    public float distanciaMenu = 1.8f;
+    public float tamanoMenu = 1.0f;
 
     [Header("Referencias UI Antiguas (Niveles)")]
     public TextMeshProUGUI textoNumNivel;
@@ -66,7 +66,7 @@ public class ControladorMenu : MonoBehaviour
     private bool calibracionEnProceso = false;
 
     [Header("Sliders de Distancia")]
-    public Slider sliderDistanciaMenu;
+    public Slider sliderTamanoMenu;
     public Slider sliderDistanciaPantalla;
 
     [Header("Textos Panel Resultados")]
@@ -88,6 +88,9 @@ public class ControladorMenu : MonoBehaviour
     private float tiempoMirandoFuera = 0f;
     private float cooldownAviso = 0f;
 
+    [Header("Tamaño Base del Menú")]
+    public Vector3 escalaBaseMenu = new Vector3(0.01f, 0.01f, 0.01f);
+
     private bool partidaTerminada = false;
 
     void Start()
@@ -97,6 +100,7 @@ public class ControladorMenu : MonoBehaviour
         audioSourceMenu.ignoreListenerPause = true;
         panelMenu.SetActive(true);
         AbrirPanel(panelBienvenida);
+        pantallaArkanoid.gameObject.SetActive(false);
 
         if (GestorDatosUsuario.Instancia != null)
         {
@@ -142,9 +146,14 @@ public class ControladorMenu : MonoBehaviour
         if (togglePantallaCurva != null) togglePantallaCurva.isOn = esCurva;
         if (pantallaPlana != null) pantallaPlana.SetActive(!esCurva);
         if (pantallaCurva != null) pantallaCurva.SetActive(esCurva);
+        tamanoMenu = config.tamanoMenu;
 
-        distanciaMenu = config.distanciaMenu;
-        if (sliderDistanciaMenu != null) sliderDistanciaMenu.value = config.distanciaMenu;
+        if (tamanoMenu <= 0.5f)
+        {
+            tamanoMenu = 1.0f;
+        }
+
+        if (sliderTamanoMenu != null) sliderTamanoMenu.value = tamanoMenu;
 
         float distInicial = esCurva ? config.distanciaCurva : config.distanciaPlana;
         distanciaPantallaArkanoid = distInicial;
@@ -267,8 +276,10 @@ public class ControladorMenu : MonoBehaviour
         }
 
         Vector3 posPantalla = headPos + (lookDirection.normalized * distanciaPantallaArkanoid);
-        pantallaArkanoid.position = posPantalla;
 
+        posPantalla.y = Mathf.Max(posPantalla.y, headPos.y - 0.1f);
+
+        pantallaArkanoid.position = posPantalla;
         pantallaArkanoid.LookAt(headPos);
         pantallaArkanoid.Rotate(0, 180, 0);
 
@@ -276,7 +287,6 @@ public class ControladorMenu : MonoBehaviour
 
         if (GestorDatosUsuario.Instancia != null)
         {
-            // Guardamos la rotación X (inclinación hacia arriba/abajo) de la pantalla
             GestorDatosUsuario.Instancia.configActual.inclinacionPantallaX = pantallaArkanoid.eulerAngles.x;
             GestorDatosUsuario.Instancia.GuardarConfiguracion();
         }
@@ -295,7 +305,7 @@ public class ControladorMenu : MonoBehaviour
             if (lookDirection == Vector3.zero) lookDirection = Vector3.forward;
         }
 
-        Vector3 targetPos = headPos + (lookDirection.normalized * distanciaMenu);
+        Vector3 targetPos = headPos + (lookDirection.normalized * 2.5f);
         targetPos.y = Mathf.Max(targetPos.y, headPos.y - 0.2f);
 
         float distanciaAlObjetivo = Vector3.Distance(transform.position, targetPos);
@@ -315,6 +325,9 @@ public class ControladorMenu : MonoBehaviour
             Quaternion rotacionIdeal = Quaternion.LookRotation(direccionHaciaCabeza);
             transform.rotation = Quaternion.Slerp(transform.rotation, rotacionIdeal, Time.deltaTime * 5f);
         }
+
+        Vector3 escalaIdeal = escalaBaseMenu * tamanoMenu;
+        transform.localScale = Vector3.Lerp(transform.localScale, escalaIdeal, Time.deltaTime * 5f);
     }
 
     public void BotonUI_CambiarMandoActivo(int modoElegido)
@@ -447,6 +460,7 @@ public class ControladorMenu : MonoBehaviour
             NotificacionFlotanteVR.Instancia.MostrarNotificacion($"Si quieres centrar la vista, pulsa el botón Y o el botón B", 5f); // Podría meter luego que se detecte el mando con el que se está jugando para indicar solo el botón de ese mando
         }
         AbrirPanel(panelNiveles);
+        pantallaArkanoid.gameObject.SetActive(true);
         CambiarNivel(0);
     }
 
@@ -485,6 +499,7 @@ public class ControladorMenu : MonoBehaviour
     public void BotonUI_VolverAlMenu()
     {
         GestorArkanoid.Instancia.VolverAlMenuPrincipal();
+        pantallaArkanoid.gameObject.SetActive(true);
         AbrirPanel(panelNiveles);
     }
 
@@ -608,6 +623,7 @@ public class ControladorMenu : MonoBehaviour
 
     private System.Collections.IEnumerator RutinaCalibrarCentro()
     {
+        pantallaArkanoid.gameObject.SetActive(false);
         calibracionEnProceso = true;
         panelAjustes.SetActive(false);
         panelCuentaAtras.SetActive(true);
@@ -638,6 +654,7 @@ public class ControladorMenu : MonoBehaviour
         panelAjustes.SetActive(true);
         calibracionEnProceso = false;
         ActualizarLaseres(true);
+        pantallaArkanoid.gameObject.SetActive(true);
     }
 
     private System.Collections.IEnumerator CalibrarBrazoCompleto(OVRInput.Controller mando, string nombreBrazo)
@@ -771,17 +788,18 @@ public class ControladorMenu : MonoBehaviour
             CentrarVistaUsuario();
     }
 
-    public void CambiarDistanciaMenu(float nuevaDist)
+    public void CambiarTamanoMenu(float nuevoTamano)
     {
-        sliderDistanciaMenu.value = nuevaDist;
+        if (sliderTamanoMenu != null) sliderTamanoMenu.value = nuevoTamano;
 
-        distanciaMenu = nuevaDist;
+        tamanoMenu = nuevoTamano;
+
         if (GestorDatosUsuario.Instancia != null)
         {
-            GestorDatosUsuario.Instancia.configActual.distanciaMenu = nuevaDist;
+            GestorDatosUsuario.Instancia.configActual.tamanoMenu = nuevoTamano;
             GestorDatosUsuario.Instancia.GuardarConfiguracion();
         }
-        ColocarMenuDelanteDeLaMirada();
+        Update();
     }
 
     public void CambiarDistanciaPantalla(float nuevaDist)
