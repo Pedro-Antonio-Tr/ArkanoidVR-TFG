@@ -21240,7 +21240,7 @@ RectTransform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: -1}
   m_LocalPosition: {x: 0, y: 0, z: 2.5}
   m_LocalScale: {x: 0.01, y: 0.01, z: 0.01}
-  m_ConstrainProportionsScale: 0
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 2081011807}
   m_Father: {fileID: 0}
@@ -21308,7 +21308,7 @@ MonoBehaviour:
   - {fileID: 871263448}
   pantallaArkanoid: {fileID: 251155225}
   distanciaPantallaArkanoid: 4
-  tamanoMenu: 1.019
+  tamanoMenu: 0.989
   textoNumNivel: {fileID: 1050668206}
   textoStatsClinicas: {fileID: 1295690408}
   panelCuentaAtras: {fileID: 487324546}
@@ -21472,7 +21472,7 @@ MonoBehaviour:
   m_MinValue: 0.5
   m_MaxValue: 1.5
   m_WholeNumbers: 0
-  m_Value: 1.019
+  m_Value: 0.989
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:

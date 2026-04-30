@@ -148,7 +148,7 @@ public class ControladorMenu : MonoBehaviour
         if (pantallaCurva != null) pantallaCurva.SetActive(esCurva);
         tamanoMenu = config.tamanoMenu;
 
-        if (tamanoMenu <= 0.5f)
+        if (tamanoMenu < 0.5f)
         {
             tamanoMenu = 1.0f;
         }
@@ -327,7 +327,7 @@ public class ControladorMenu : MonoBehaviour
         }
 
         Vector3 escalaIdeal = escalaBaseMenu * tamanoMenu;
-        transform.localScale = Vector3.Lerp(transform.localScale, escalaIdeal, Time.deltaTime * 5f);
+        transform.localScale = escalaIdeal;
     }
 
     public void BotonUI_CambiarMandoActivo(int modoElegido)
@@ -799,7 +799,7 @@ public class ControladorMenu : MonoBehaviour
             GestorDatosUsuario.Instancia.configActual.tamanoMenu = nuevoTamano;
             GestorDatosUsuario.Instancia.GuardarConfiguracion();
         }
-        Update();
+        ColocarMenuDelanteDeLaMirada();
     }
 
     public void CambiarDistanciaPantalla(float nuevaDist)
