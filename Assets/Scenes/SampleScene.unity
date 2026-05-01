@@ -4677,7 +4677,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!64 &225636975
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -19605,7 +19605,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 1
         m_CallState: 2
-  m_IsOn: 1
+  m_IsOn: 0
 --- !u!1 &1066456335
 GameObject:
   m_ObjectHideFlags: 0
@@ -21239,7 +21239,7 @@ RectTransform:
   m_GameObject: {fileID: 1157330727}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: -1}
   m_LocalPosition: {x: 0, y: 0, z: 2.5}
-  m_LocalScale: {x: 0.01, y: 0.01, z: 0.01}
+  m_LocalScale: {x: 0.00995, y: 0.00995, z: 0.00995}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 2081011807}
@@ -21308,7 +21308,7 @@ MonoBehaviour:
   - {fileID: 871263448}
   pantallaArkanoid: {fileID: 251155225}
   distanciaPantallaArkanoid: 4
-  tamanoMenu: 0.989
+  tamanoMenu: 0.995
   textoNumNivel: {fileID: 1050668206}
   textoStatsClinicas: {fileID: 1295690408}
   panelCuentaAtras: {fileID: 487324546}
@@ -21333,7 +21333,7 @@ MonoBehaviour:
   imgBrazoDer_EstiradoDer: {fileID: 21300000, guid: 61370b48960617b41825c95beecd8353, type: 3}
   anguloTolerancia: 45
   tiempoParaAviso: 3
-  escalaBaseMenu: {x: 0, y: 0, z: 0}
+  escalaBaseMenu: {x: 0.01, y: 0.01, z: 0.01}
 --- !u!65 &1157330734
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -21472,7 +21472,7 @@ MonoBehaviour:
   m_MinValue: 0.5
   m_MaxValue: 1.5
   m_WholeNumbers: 0
-  m_Value: 0.989
+  m_Value: 0.995
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
@@ -33256,7 +33256,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!64 &1865414027
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -33975,7 +33975,7 @@ MonoBehaviour:
   m_FillRect: {fileID: 239331627}
   m_HandleRect: {fileID: 614232913}
   m_Direction: 0
-  m_MinValue: 4
+  m_MinValue: 3
   m_MaxValue: 6
   m_WholeNumbers: 0
   m_Value: 4
