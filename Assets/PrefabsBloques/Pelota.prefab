@@ -159,7 +159,7 @@ MonoBehaviour:
   sonidoPared: {fileID: 8300000, guid: e614150bdfdd79f4eaa3bcd8dd787142, type: 3}
   sonidoPala: {fileID: 8300000, guid: c65b4928a7cfebf42852d6892e5331ab, type: 3}
   matExplosivo: {fileID: 2100000, guid: f1718e65075489d49a1b9a7a128113c4, type: 2}
-  radioExplosion: 5
+  radioExplosion: 2.5
   prefabEfectoExplosion: {fileID: 6095401668142476946, guid: 16db551c96aa38b4aa6a700e69953d13, type: 3}
 --- !u!96 &3623483779140908523
 TrailRenderer:
