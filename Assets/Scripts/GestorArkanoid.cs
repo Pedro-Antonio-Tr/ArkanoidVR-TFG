@@ -64,6 +64,7 @@ public class GestorArkanoid : MonoBehaviour
     public int puntuacionActual = 0;
     public int tiempoParSegundos = 300; // 5 minutos para el bonus por tiempo
     public int puntosPorSegundoAhorrado = 25;
+    private bool recordSuperado = false;
 
     [Header("UI Vidas (Corazones)")]
     public RectTransform contenedorCorazones;
@@ -73,6 +74,9 @@ public class GestorArkanoid : MonoBehaviour
 
     [Header("UI Puntuación")]
     public TextMeshProUGUI textoPuntuacion;
+
+    [Header("Efectos de Texto")]
+    public DynamicTextData perfilTextoRecord;
 
     private int recordDelNivel = 0;
 
@@ -175,6 +179,7 @@ public class GestorArkanoid : MonoBehaviour
         if (textoEstadisticas != null) textoEstadisticas.text = "";
         tiempoPartida = 0f;
         explosivoActivo = false;
+        recordSuperado = false;
 
         puntuacionActual = 0;
         if (GestorDatosUsuario.Instancia != null)
@@ -326,6 +331,7 @@ public class GestorArkanoid : MonoBehaviour
         juegoEmpezado = false;
         textoMensajes.text = mensaje;
         explosivoActivo = false;
+        recordSuperado = false;
 
         // Formatear tiempo en Minutos:Segundos
         int minutos = Mathf.FloorToInt(tiempoPartida / 60F);
@@ -641,11 +647,18 @@ public class GestorArkanoid : MonoBehaviour
     {
         if (textoPuntuacion == null) return;
 
-        string colorPuntos = "white"; // Color normal
+        string colorPuntos = "white";
 
-        if (puntuacionActual > recordDelNivel && recordDelNivel > 0)
+        if (puntuacionActual > recordDelNivel && recordDelNivel > 0 && !recordSuperado)
         {
             colorPuntos = "yellow";
+            recordSuperado = true;
+
+            if (puntoAparicion != null && perfilTextoRecord != null)
+            {
+                Vector3 posTexto = puntoAparicion.position + new Vector3(0, 1.5f, 0);
+                DynamicTextManager.CreateText(posTexto, "¡NUEVO RÉCORD!", perfilTextoRecord);
+            }
         }
 
         textoPuntuacion.text = $"PUNTOS: <color={colorPuntos}>{puntuacionActual:N0}</color>\n<size=80%>RÉCORD: {recordDelNivel:N0}</size>";

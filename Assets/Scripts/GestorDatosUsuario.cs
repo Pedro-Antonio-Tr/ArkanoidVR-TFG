@@ -22,7 +22,7 @@ public class DatosConfiguracion //Pongo los valores del default porque en las ga
     public float alcanceIzqX_R = -0.2471681386232376f;
     public float alcanceDerX_R = 0.6305392980575562f;
 
-    public float tamanoMenu = 1.0f;
+    public float tamanoMenu = 0.8f;
     public float distanciaPlana = 3.5854644775390627f;
     public float distanciaCurva = 4.248764514923096f;
 }

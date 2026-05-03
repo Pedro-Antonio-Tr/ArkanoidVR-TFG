@@ -21,6 +21,7 @@ public class ControladorMenu : MonoBehaviour
     public GameObject panelPausa;
     public GameObject panelAjustes;
     public GameObject panelResultados;
+    public GameObject panelConfPantallas;
 
     [Header("Botones de Modo (Para oscurecer en todos los menús)")]
     public Button[] botonesMandoIzq;
@@ -242,6 +243,7 @@ public class ControladorMenu : MonoBehaviour
             {
                 ActualizarStatsPausa();
                 AbrirPanel(panelPausa);
+                pantallaArkanoid.gameObject.SetActive(true);
             }
         }
     }
@@ -254,8 +256,15 @@ public class ControladorMenu : MonoBehaviour
         panelPausa.SetActive(false);
         panelAjustes.SetActive(false);
         panelResultados.SetActive(false);
+        panelConfPantallas.SetActive(false);
 
         panelDestino.SetActive(true);
+    }
+
+    public void BotonUI_AbrirConfPantallas()
+    {
+        AbrirPanel(panelConfPantallas);
+        pantallaArkanoid.gameObject.SetActive(true);
     }
 
     public void CentrarVistaUsuario()
@@ -277,7 +286,14 @@ public class ControladorMenu : MonoBehaviour
 
         Vector3 posPantalla = headPos + (lookDirection.normalized * distanciaPantallaArkanoid);
 
-        posPantalla.y = Mathf.Max(posPantalla.y, headPos.y - 0.1f);
+        float limiteAlturaSeguridad = -0.1f;
+
+        if (togglePantallaCurva != null && togglePantallaCurva.isOn)
+        {
+            limiteAlturaSeguridad = 1.5f;
+        }
+
+        posPantalla.y = Mathf.Max(posPantalla.y, headPos.y + limiteAlturaSeguridad);
 
         pantallaArkanoid.position = posPantalla;
         pantallaArkanoid.LookAt(headPos);
@@ -316,14 +332,14 @@ public class ControladorMenu : MonoBehaviour
         }
         else
         {
-            transform.position = Vector3.Lerp(transform.position, targetPos, Time.deltaTime * 5f);
+            transform.position = Vector3.Lerp(transform.position, targetPos, Time.unscaledDeltaTime * 5f);
         }
 
         Vector3 direccionHaciaCabeza = transform.position - headPos;
         if (direccionHaciaCabeza != Vector3.zero)
         {
             Quaternion rotacionIdeal = Quaternion.LookRotation(direccionHaciaCabeza);
-            transform.rotation = Quaternion.Slerp(transform.rotation, rotacionIdeal, Time.deltaTime * 5f);
+            transform.rotation = Quaternion.Slerp(transform.rotation, rotacionIdeal, Time.unscaledDeltaTime * 5f);
         }
 
         Vector3 escalaIdeal = escalaBaseMenu * tamanoMenu;
@@ -506,6 +522,7 @@ public class ControladorMenu : MonoBehaviour
     public void BotonUI_IrAAjustes()
     {
         AbrirPanel(panelAjustes);
+        pantallaArkanoid.gameObject.SetActive(false);
     }
 
     public void BotonUI_VolverAAjustesAnterior()
@@ -521,6 +538,7 @@ public class ControladorMenu : MonoBehaviour
         else if (GestorArkanoid.Instancia != null && !GestorArkanoid.Instancia.juegoEmpezado && !GestorArkanoid.Instancia.enCuentaAtras)
         {
             AbrirPanel(panelNiveles);
+            pantallaArkanoid.gameObject.SetActive(true);
         }
         else AbrirPanel(panelPausa);
     }

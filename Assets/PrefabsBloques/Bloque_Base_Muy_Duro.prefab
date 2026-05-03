@@ -137,3 +137,4 @@ MonoBehaviour:
   sonidoGolpe: {fileID: 8300000, guid: 8412d2ab897bce54dbc81d6f3a3dca57, type: 3}
   sonidoRotura: {fileID: 8300000, guid: 03b355f04da1ff34a99d05e415d8adb0, type: 3}
   puntosBase: 375
+  perfilTextoPuntos: {fileID: 11400000, guid: f989158d56d8c1d4ca6a3927596fd075, type: 2}

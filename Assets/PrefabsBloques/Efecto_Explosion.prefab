@@ -105,4 +105,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EfectoExplosion
   tiempoDuracion: 0.5
-  multiplicadorEscala: 3
+  multiplicadorEscala: 2.5

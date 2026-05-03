@@ -10,7 +10,7 @@
     "centroX_R": 0.062207408249378207,
     "alcanceIzqX_R": -0.2471681386232376,
     "alcanceDerX_R": 0.6305392980575562,
-    "distanciaMenu": 3,
+    "tamanoMenu": 0.8,
     "distanciaPlana": 3.5854644775390627,
     "distanciaCurva": 4.248764514923096
 }

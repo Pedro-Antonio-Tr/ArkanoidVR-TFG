@@ -27,6 +27,9 @@ public class BloqueArkanoid : MonoBehaviour
     [Header("Puntuación")]
     public int puntosBase = 100;
 
+    [Header("Efectos visuales")]
+    public DynamicTextData perfilTextoPuntos;
+
     void Start()
     {
         renderizador = GetComponent<MeshRenderer>();
@@ -91,6 +94,17 @@ public class BloqueArkanoid : MonoBehaviour
             if (GestorArkanoid.Instancia != null)
             {
                 GestorArkanoid.Instancia.SumarPuntos(puntosBase);
+            }
+            Vector3 posTexto = transform.position;
+            posTexto.z -= 0.5f;
+
+            if (perfilTextoPuntos != null)
+            {
+                DynamicTextManager.CreateText(posTexto, "+" + puntosBase.ToString(), perfilTextoPuntos);
+            }
+            else
+            {
+                DynamicTextManager.CreateText(posTexto, "+" + puntosBase.ToString(), DynamicTextManager.defaultData);
             }
             if (sonidoRotura != null)
             {

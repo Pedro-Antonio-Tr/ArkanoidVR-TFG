@@ -31,13 +31,13 @@ public class NotificacionFlotanteVR : MonoBehaviour
 
         Vector3 puntoIdeal = headAnchor.position + (headAnchor.forward * distanciaAdelante) + (headAnchor.up * desplazamientoAbajo);
 
-        transform.position = Vector3.Lerp(transform.position, puntoIdeal, Time.deltaTime * velocidadSeguimiento);
+        transform.position = Vector3.Lerp(transform.position, puntoIdeal, Time.unscaledDeltaTime * velocidadSeguimiento);
 
         Vector3 direccionHaciaCabeza = transform.position - headAnchor.position;
         if (direccionHaciaCabeza != Vector3.zero)
         {
             Quaternion rotacionIdeal = Quaternion.LookRotation(direccionHaciaCabeza);
-            transform.rotation = Quaternion.Slerp(transform.rotation, rotacionIdeal, Time.deltaTime * velocidadSeguimiento);
+            transform.rotation = Quaternion.Slerp(transform.rotation, rotacionIdeal, Time.unscaledDeltaTime * velocidadSeguimiento);
         }
     }
 
@@ -60,7 +60,7 @@ public class NotificacionFlotanteVR : MonoBehaviour
     {
         while (canvasGroup.alpha < 1f)
         {
-            canvasGroup.alpha += Time.deltaTime * 5f;
+            canvasGroup.alpha += Time.unscaledDeltaTime * 5f;
             yield return null;
         }
 
@@ -68,7 +68,7 @@ public class NotificacionFlotanteVR : MonoBehaviour
 
         while (canvasGroup.alpha > 0f)
         {
-            canvasGroup.alpha -= Time.deltaTime * 3f;
+            canvasGroup.alpha -= Time.unscaledDeltaTime * 3f;
             yield return null;
         }
 
