@@ -2064,7 +2064,7 @@ GameObject:
   - component: {fileID: 88157746}
   - component: {fileID: 88157745}
   m_Layer: 5
-  m_Name: Texto_Dist_Menu
+  m_Name: Texto_Tamano_Menu
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2086,7 +2086,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -96, y: 10}
+  m_AnchoredPosition: {x: -96, y: 0}
   m_SizeDelta: {x: 100, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &88157745
@@ -13370,8 +13370,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 80}
-  m_SizeDelta: {x: 90, y: 20}
+  m_AnchoredPosition: {x: 0, y: 70}
+  m_SizeDelta: {x: 110, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &688749903
 MonoBehaviour:
@@ -13393,7 +13393,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Ajustes
+  m_text: Ajustes pantallas
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -18067,7 +18067,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 60, y: 55}
+  m_AnchoredPosition: {x: 60, y: 35}
   m_SizeDelta: {x: 130, y: 20}
   m_Pivot: {x: 1, y: 1}
 --- !u!114 &925234050
@@ -21666,8 +21666,8 @@ MonoBehaviour:
   imgBrazoIzq_EstiradoIzq: {fileID: 21300000, guid: c2b9aa2c64804c444b5806c736f0aa97, type: 3}
   imgBrazoIzq_EstiradoDer: {fileID: 21300000, guid: 5e53d501602a0a343b63238122915136, type: 3}
   imgBrazoDer_Centro: {fileID: 21300000, guid: fa091e62a00d8a54399913514508c161, type: 3}
-  imgBrazoDer_EstiradoIzq: {fileID: 21300000, guid: 7902d984078b93f43b9410c608b58505, type: 3}
-  imgBrazoDer_EstiradoDer: {fileID: 21300000, guid: 61370b48960617b41825c95beecd8353, type: 3}
+  imgBrazoDer_EstiradoIzq: {fileID: 21300000, guid: 61370b48960617b41825c95beecd8353, type: 3}
+  imgBrazoDer_EstiradoDer: {fileID: 21300000, guid: 7902d984078b93f43b9410c608b58505, type: 3}
   anguloTolerancia: 45
   tiempoParaAviso: 3
   escalaBaseMenu: {x: 0.01, y: 0.01, z: 0.01}
@@ -24352,7 +24352,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 50, y: 10}
+  m_AnchoredPosition: {x: 50, y: 0}
   m_SizeDelta: {x: 160, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1347924217

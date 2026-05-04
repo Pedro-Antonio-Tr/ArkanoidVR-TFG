@@ -657,13 +657,16 @@ public class ControladorMenu : MonoBehaviour
 
             yield return CalibrarBrazoCompleto(OVRInput.Controller.RTouch, "BRAZO DERECHO");
         }
+        else if (modo == MonitorClinico.ModoControl.Izquierdo)
+        {
+            yield return CalibrarBrazoCompleto(OVRInput.Controller.LTouch, "BRAZO IZQUIERDO");
+        }
         else
         {
-            OVRInput.Controller mando = (modo == MonitorClinico.ModoControl.Izquierdo) ? OVRInput.Controller.LTouch : OVRInput.Controller.RTouch;
-            yield return CalibrarBrazoCompleto(mando, "CALIBRACIÓN");
+            yield return CalibrarBrazoCompleto(OVRInput.Controller.RTouch, "BRAZO DERECHO");
         }
 
-        GestorDatosUsuario.Instancia.GuardarConfiguracion();
+            GestorDatosUsuario.Instancia.GuardarConfiguracion();
         textoInstrucciones.text = "¡CALIBRACIÓN COMPLETA!";
         textoCuentaAtras.text = "";
         yield return new WaitForSecondsRealtime(2f);

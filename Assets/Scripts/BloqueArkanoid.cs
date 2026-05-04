@@ -97,14 +97,26 @@ public class BloqueArkanoid : MonoBehaviour
             }
             Vector3 posTexto = transform.position;
             posTexto.z -= 0.5f;
+            int puntosGanados = puntosBase;
+            if (MonitorClinico.Instancia != null)
+            {
+                if (MonitorClinico.Instancia.dificultadActual == MonitorClinico.NivelDificultad.Normal)
+                {
+                    puntosGanados = Mathf.RoundToInt(puntosBase * 1.5f);
+                }
+                else if (MonitorClinico.Instancia.dificultadActual == MonitorClinico.NivelDificultad.Dificil)
+                {
+                    puntosGanados = Mathf.RoundToInt(puntosBase * 2f);
+                }
+            }
 
             if (perfilTextoPuntos != null)
             {
-                DynamicTextManager.CreateText(posTexto, "+" + puntosBase.ToString(), perfilTextoPuntos);
+                DynamicTextManager.CreateText(posTexto, "+" + puntosGanados.ToString(), perfilTextoPuntos);
             }
             else
             {
-                DynamicTextManager.CreateText(posTexto, "+" + puntosBase.ToString(), DynamicTextManager.defaultData);
+                DynamicTextManager.CreateText(posTexto, "+" + puntosGanados.ToString(), DynamicTextManager.defaultData);
             }
             if (sonidoRotura != null)
             {

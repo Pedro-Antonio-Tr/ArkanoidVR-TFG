@@ -156,19 +156,23 @@ public class GestorArkanoid : MonoBehaviour
 
     public void CargarPrevisualizacion(int indice)
     {
+        recordSuperado = false;
         if (nivelActualInstanciado != null)
         {
             Destroy(nivelActualInstanciado);
-        }
-        if (textoPuntuacion != null)
-        {
-            textoPuntuacion.text = "000000";
         }
         nivelElegido = indice;
         if (listaDeNiveles.Length > 0)
         {
             nivelActualInstanciado = Instantiate(listaDeNiveles[nivelElegido], transform.position, Quaternion.identity, transform);
         }
+
+        puntuacionActual = 0;
+        if (GestorDatosUsuario.Instancia != null)
+        {
+            recordDelNivel = GestorDatosUsuario.Instancia.ObtenerRecordPorNivel($"Nivel {nivelElegido + 1}");
+        }
+        ActualizarTextoPuntuacion();
     }
 
     public void EmpezarPartidaDesdeMenu()
@@ -181,11 +185,6 @@ public class GestorArkanoid : MonoBehaviour
         explosivoActivo = false;
         recordSuperado = false;
 
-        puntuacionActual = 0;
-        if (GestorDatosUsuario.Instancia != null)
-        {
-            recordDelNivel = GestorDatosUsuario.Instancia.ObtenerRecordPorNivel($"Nivel {nivelElegido + 1}");
-        }
         ActualizarTextoPuntuacion();
         CargarPrevisualizacion(nivelElegido);
         ConfigurarVidasIniciales();
