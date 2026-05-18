@@ -92,6 +92,12 @@ public class ControladorMenu : MonoBehaviour
     [Header("Tamaño Base del Menú")]
     public Vector3 escalaBaseMenu = new Vector3(0.01f, 0.01f, 0.01f);
 
+    [Header("Comportamiento del Menú")]
+    public float distanciaToleranciaMenu = 0.8f;
+    public float distanciaSaltoMenu = 1.5f;
+    public float velocidadSeguimientoMenu = 5f;
+    private bool menuEnMovimiento = false;
+
     private bool partidaTerminada = false;
 
     void Start()
@@ -290,7 +296,7 @@ public class ControladorMenu : MonoBehaviour
 
         if (togglePantallaCurva != null && togglePantallaCurva.isOn)
         {
-            limiteAlturaSeguridad = 1.5f;
+            limiteAlturaSeguridad = 0.5f + (sliderDistanciaPantalla.value * 0.25f);
         }
 
         posPantalla.y = Mathf.Max(posPantalla.y, headPos.y + limiteAlturaSeguridad);
@@ -298,6 +304,15 @@ public class ControladorMenu : MonoBehaviour
         pantallaArkanoid.position = posPantalla;
         pantallaArkanoid.LookAt(headPos);
         pantallaArkanoid.Rotate(0, 180, 0);
+
+        if (togglePantallaCurva != null && togglePantallaCurva.isOn)
+        {
+            if (headAnchor.forward.y < 0.15f)
+            {
+                Vector3 rotacionActual = pantallaArkanoid.eulerAngles;
+                pantallaArkanoid.eulerAngles = new Vector3(0, rotacionActual.y, rotacionActual.z);
+            }
+        }
 
         ColocarMenuDelanteDeLaMirada();
 
@@ -326,20 +341,33 @@ public class ControladorMenu : MonoBehaviour
 
         float distanciaAlObjetivo = Vector3.Distance(transform.position, targetPos);
 
-        if (distanciaAlObjetivo > 1.5f)
+        if (distanciaAlObjetivo > distanciaSaltoMenu)
         {
             transform.position = targetPos;
+            Vector3 direccionHaciaCabeza = transform.position - headPos;
+            if (direccionHaciaCabeza != Vector3.zero)
+            {
+                transform.rotation = Quaternion.LookRotation(direccionHaciaCabeza);
+            }
+            menuEnMovimiento = false;
         }
-        else
+        else if (distanciaAlObjetivo > distanciaToleranciaMenu || menuEnMovimiento)
         {
-            transform.position = Vector3.Lerp(transform.position, targetPos, Time.unscaledDeltaTime * 5f);
-        }
+            menuEnMovimiento = true;
 
-        Vector3 direccionHaciaCabeza = transform.position - headPos;
-        if (direccionHaciaCabeza != Vector3.zero)
-        {
-            Quaternion rotacionIdeal = Quaternion.LookRotation(direccionHaciaCabeza);
-            transform.rotation = Quaternion.Slerp(transform.rotation, rotacionIdeal, Time.unscaledDeltaTime * 5f);
+            transform.position = Vector3.Lerp(transform.position, targetPos, Time.unscaledDeltaTime * velocidadSeguimientoMenu);
+
+            Vector3 direccionHaciaCabeza = transform.position - headPos;
+            if (direccionHaciaCabeza != Vector3.zero)
+            {
+                Quaternion rotacionIdeal = Quaternion.LookRotation(direccionHaciaCabeza);
+                transform.rotation = Quaternion.Slerp(transform.rotation, rotacionIdeal, Time.unscaledDeltaTime * velocidadSeguimientoMenu);
+            }
+
+            if (distanciaAlObjetivo < 0.05f)
+            {
+                menuEnMovimiento = false;
+            }
         }
 
         Vector3 escalaIdeal = escalaBaseMenu * tamanoMenu;
