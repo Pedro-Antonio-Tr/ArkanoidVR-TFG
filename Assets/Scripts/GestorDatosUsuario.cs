@@ -183,9 +183,9 @@ public class GestorDatosUsuario : MonoBehaviour
         {
             if (!existe)
             {
-                sw.WriteLine("FechaHora;Nivel;Dificultad;Duracion(s);Resultado;BloquesRestantes;IndiceFatiga;ReaccionMedia(s);Golpes_IZQ;Golpes_DER;Puntuacion;VidasRestantes");
+                sw.WriteLine("ID_Sesion;Nivel;Dificultad;Duracion(s);Resultado;BloquesRestantes;IndiceFatiga;ReaccionMedia(s);Golpes_IZQ;Golpes_DER;Puntuacion;VidasRestantes");
             }
-            sw.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss};{nivel};{dificultad};{duracion:F1};{resultado};{bloques};{fatiga:F2};{reaccion:F2};{golpesI};{golpesD};{puntos};{vidas}");
+            sw.WriteLine($"{MonitorClinico.Instancia.idSesionActual};{nivel};{dificultad};{duracion:F1};{resultado};{bloques};{fatiga:F2};{reaccion:F2};{golpesI};{golpesD};{puntos};{vidas}");
         }
     }
 
