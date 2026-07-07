@@ -35,14 +35,19 @@ public class MonitorClinico : MonoBehaviour
     public float frecuenciaRegistro = 0.1f; // 0.1s = 10 registros por segundo
     public float umbralMovimientoBrusco = 3.0f; // Se considera brusco si la aceleración supera 3 m/s²
 
+    [Header("Tiempo de Reacción")]
+    public float margenPala = 0.5f; // Ajusta esto a la mitad del ancho de tu pala
+    public float tiempoMedioReaccion = 0f;
+    private int conteoTiemposReaccion = 0;
+    private float sumaTiemposReaccion = 0f;
+
+    private float tiempoInicioEstimulo = 0f;
+    private bool estimuloActivo = false;
+    private float posicionDestinoX = 0f;
+
     private StreamWriter escritorTelemetria;
     private bool grabandoTelemetria = false;
     private float tiempoInicioSesionTelemetria;
-
-    // Tiempos de reacción
-    private List<float> tiemposDeReaccion = new List<float>();
-    private bool midiendoReaccion = false;
-    private float tiempoInicioReaccion = 0f;
 
     // Variables internas para fatiga
     private Quaternion rotacionAnteriorIzq;
@@ -69,7 +74,6 @@ public class MonitorClinico : MonoBehaviour
 
         RegistrarTiempoUso();
         MedirFatiga();
-        ComprobarReaccion();
     }
 
     void RegistrarTiempoUso()
@@ -100,86 +104,10 @@ public class MonitorClinico : MonoBehaviour
         }
     }
 
-    // Esta función la llamará la pelota cuando choque contra un bloque
-    public void IniciarMedicionReaccion()
-    {
-        if (!midiendoReaccion)
-        {
-            midiendoReaccion = true;
-            tiempoInicioReaccion = Time.time;
-        }
-    }
-
-    void ComprobarReaccion()
-    {
-        if (midiendoReaccion)
-        {
-            float velocidadMovimiento = 0f;
-
-            // Leemos la velocidad real de la mano en el eje X usando la API de Meta
-            if (modoActual == ModoControl.Derecho || modoActual == ModoControl.Ambos)
-            {
-                velocidadMovimiento = Mathf.Abs(OVRInput.GetLocalControllerVelocity(OVRInput.Controller.RTouch).x);
-            }
-            else if (modoActual == ModoControl.Izquierdo)
-            {
-                velocidadMovimiento = Mathf.Abs(OVRInput.GetLocalControllerVelocity(OVRInput.Controller.LTouch).x);
-            }
-
-            // Si la mano se mueve a una velocidad significativa (0.2 metros/segundo), ha reaccionado
-            if (velocidadMovimiento > 0.2f)
-            {
-                float tiempoReaccion = Time.time - tiempoInicioReaccion;
-                tiemposDeReaccion.Add(tiempoReaccion);
-                midiendoReaccion = false;
-            }
-        }
-    }
-
-    public void GuardarDatosCSV()
-    {
-        // Ruta persistente en Android (Meta Quest)
-        string fechaHora = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
-        string nombreArchivo = $"Sesion_{fechaHora}.csv";
-        string ruta = Path.Combine(Application.persistentDataPath, nombreArchivo);
-
-        // Calcular media de reacción
-        float sumaReaccion = 0f;
-        foreach (float t in tiemposDeReaccion) sumaReaccion += t;
-        float mediaReaccion = tiemposDeReaccion.Count > 0 ? sumaReaccion / tiemposDeReaccion.Count : 0f;
-
-        try
-        {
-            using (StreamWriter writer = new StreamWriter(ruta, false))
-            {
-                // Cabeceras del CSV
-                writer.WriteLine("Fecha,Modo_Mando_Derecho,Modo_Mando_Izquierdo,Modo_Ambos_Mandos,Dificultad,Indice_Fatiga,Reaccion_Media");
-
-                // Datos
-                writer.WriteLine($"{fechaHora},{tiempoMandoDerecho:F2},{tiempoMandoIzquierdo:F2},{tiempoAmbosMandos:F2},{dificultadActual},{indiceFatiga:F2},{mediaReaccion:F2}");
-            }
-            Debug.Log("¡CSV Guardado con éxito en: " + ruta + "!");
-        }
-        catch (Exception e)
-        {
-            Debug.LogError("Error al guardar el CSV: " + e.Message);
-        }
-    }
-
     public float ObtenerMediaReaccion()
     {
-        if (tiemposDeReaccion == null || tiemposDeReaccion.Count == 0)
-        {
-            return 0f;
-        }
-
-        float suma = 0f;
-        foreach (float t in tiemposDeReaccion)
-        {
-            suma += t;
-        }
-
-        return suma / tiemposDeReaccion.Count;
+        if (conteoTiemposReaccion == 0) return 0f;
+        return sumaTiemposReaccion / conteoTiemposReaccion;
     }
 
     public void RegistrarGolpePala(bool esIzquierda)
@@ -200,6 +128,10 @@ public class MonitorClinico : MonoBehaviour
         idSesionActual = DateTime.Now.ToString("yyyyMMdd_HHmmss");
         string nombreArchivo = $"Telemetria_{GestorDatosUsuario.Instancia.idUsuario}_{nombreNivel}_{idSesionActual}.csv";
         string ruta = Path.Combine(GestorDatosUsuario.Instancia.RutaTracking, nombreArchivo);
+
+        conteoTiemposReaccion = 0;
+        sumaTiemposReaccion = 0f;
+        estimuloActivo = false;
 
         try
         {
@@ -266,6 +198,43 @@ public class MonitorClinico : MonoBehaviour
 
             yield return new WaitForSeconds(frecuenciaRegistro);
         }
+    }
+
+    public void IniciarMedicionReaccion(float destinoX)
+    {
+        float margenDinamico = ObtenerMargenDinamico();
+
+        if (ControladorPalaVR.Instancia != null && ControladorPalaVR.Instancia.AlgunaPalaEnPosicion(destinoX, margenDinamico))
+        {
+            return;
+        }
+
+        posicionDestinoX = destinoX;
+        tiempoInicioEstimulo = Time.time;
+        estimuloActivo = true;
+    }
+
+    public void ComprobarLlegadaPala(float posXActualPala)
+    {
+        if (!estimuloActivo) return;
+
+        if (Mathf.Abs(posXActualPala - posicionDestinoX) <= ObtenerMargenDinamico())
+        {
+            float tiempoReaccion = Time.time - tiempoInicioEstimulo;
+            sumaTiemposReaccion += tiempoReaccion;
+            conteoTiemposReaccion++;
+            estimuloActivo = false;
+        }
+    }
+
+    // Calcula el margen según la dificultad
+    private float ObtenerMargenDinamico()
+    {
+        float escalaBase = 3f;
+        if (dificultadActual == NivelDificultad.Facil) escalaBase *= 1.5f;
+        else if (dificultadActual == NivelDificultad.Dificil) escalaBase *= 0.75f;
+
+        return (escalaBase / 2f) + 0.5f;
     }
 
     void OnDestroy()

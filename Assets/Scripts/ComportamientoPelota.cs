@@ -20,7 +20,7 @@ public class ComportamientoPelota : MonoBehaviour
     private Material matOriginal;
     private MeshRenderer rendererPelota;
 
-    [Header("Ajustes Explosión")]
+    [Header("Ajustes Explosiï¿½n")]
     public float radioExplosion = 2.5f;
     public GameObject prefabEfectoExplosion;
 
@@ -48,7 +48,7 @@ public class ComportamientoPelota : MonoBehaviour
         Vector3 vel = rb.linearVelocity;
         Vector3 pos = transform.localPosition;
 
-        // Límites de la pantalla 
+        // Lï¿½mites de la pantalla 
         float limiteX = 17.5f;
         float limiteY_Superior = 10f;
 
@@ -121,6 +121,65 @@ public class ComportamientoPelota : MonoBehaviour
         }
     }
 
+    private void OnCollisionExit(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Bloque"))
+        {
+            if (GestorArkanoid.Instancia.pelotasEnJuego == 1 && rb.linearVelocity.y < 0)
+            {
+                CalcularPuntoAterrizaje(rb.linearVelocity.normalized);
+            }
+        }
+    }
+
+    private void CalcularPuntoAterrizaje(Vector3 direccion)
+    {
+        Vector3 posActual = transform.position;
+        Vector3 dirActual = direccion;
+        float limiteX = 17.5f;
+
+        float alturaPala = 0f;
+        if (ControladorPalaVR.Instancia != null)
+        {
+            alturaPala = ControladorPalaVR.Instancia.ObtenerAlturaPalaActiva();
+        }
+
+        int maxRebotes = 10;
+        while (posActual.y > alturaPala && maxRebotes > 0)
+        {
+            maxRebotes--;
+            float distY = posActual.y - alturaPala;
+            float tiempoHastaPala = distY / Mathf.Abs(dirActual.y);
+            float targetX = posActual.x + (dirActual.x * tiempoHastaPala);
+
+            if (targetX > limiteX)
+            {
+                float tPared = (limiteX - posActual.x) / dirActual.x;
+                posActual.x = limiteX;
+                posActual.y += dirActual.y * tPared;
+                dirActual.x = -dirActual.x;
+            }
+            else if (targetX < -limiteX)
+            {
+                float tPared = (-limiteX - posActual.x) / dirActual.x;
+                posActual.x = -limiteX;
+                posActual.y += dirActual.y * tPared;
+                dirActual.x = -dirActual.x;
+            }
+            else
+            {
+                posActual.x = targetX;
+                posActual.y = alturaPala;
+                break;
+            }
+        }
+
+        if (MonitorClinico.Instancia != null)
+        {
+            MonitorClinico.Instancia.IniciarMedicionReaccion(posActual.x);
+        }
+    }
+
     public void ActualizarVisualesExplosivos()
     {
         if (GestorArkanoid.Instancia.explosivoActivo)
@@ -131,7 +190,7 @@ public class ComportamientoPelota : MonoBehaviour
             {
                 rendererPelota.material = matExplosivo;
             }
-            else // Parpadeo final (cada vez más rápido)
+            else // Parpadeo final (cada vez mï¿½s rï¿½pido)
             {
                 float velocidadParpadeo = Mathf.Lerp(15f, 2f, tiempo / 1.5f);
                 rendererPelota.material = (Mathf.Sin(Time.time * velocidadParpadeo) > 0) ? matExplosivo : matOriginal;

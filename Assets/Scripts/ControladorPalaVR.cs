@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class ControladorPalaVR : MonoBehaviour
 {
+    public static ControladorPalaVR Instancia;
+
     [Header("Modelos Físicos de las Palas")]
     public GameObject palaDerechaObj;
     public GameObject palaIzquierdaObj;
@@ -84,6 +86,17 @@ public class ControladorPalaVR : MonoBehaviour
         {
             palaIzquierdaObj.transform.localScale = new Vector3(escalaPala, 0.5f, 0.5f);
         }
+        if (MonitorClinico.Instancia != null)
+        {
+            if (palaDerechaObj != null && palaDerechaObj.activeSelf)
+            {
+                MonitorClinico.Instancia.ComprobarLlegadaPala(palaDerechaObj.transform.position.x);
+            }
+            if (palaIzquierdaObj != null && palaIzquierdaObj.activeSelf)
+            {
+                MonitorClinico.Instancia.ComprobarLlegadaPala(palaIzquierdaObj.transform.position.x);
+            }
+        }
     }
 
     void RegistrarROM(float posX)
@@ -129,5 +142,25 @@ public class ControladorPalaVR : MonoBehaviour
             float porcentajeEstiramiento = Mathf.Clamp01((posicionFisicaX - centro) / rangoFisico);
             return porcentajeEstiramiento * limiteIzquierdo;
         }
+    }
+
+    public bool AlgunaPalaEnPosicion(float destinoX, float margen)
+    {
+        if (palaDerechaObj != null && palaDerechaObj.activeSelf)
+        {
+            if (Mathf.Abs(palaDerechaObj.transform.position.x - destinoX) <= margen) return true;
+        }
+        if (palaIzquierdaObj != null && palaIzquierdaObj.activeSelf)
+        {
+            if (Mathf.Abs(palaIzquierdaObj.transform.position.x - destinoX) <= margen) return true;
+        }
+        return false;
+    }
+
+    public float ObtenerAlturaPalaActiva()
+    {
+        if (palaDerechaObj != null && palaDerechaObj.activeSelf) return palaDerechaObj.transform.position.y;
+        if (palaIzquierdaObj != null && palaIzquierdaObj.activeSelf) return palaIzquierdaObj.transform.position.y;
+        return 0f;
     }
 }
